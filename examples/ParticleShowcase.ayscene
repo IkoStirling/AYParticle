@@ -1,0 +1,339 @@
+{
+    "__coordConvention": "ay-coordinates-lh-yup-zfwd-ccw-uvtop-m-v1",
+    "__schemaVersion": 3,
+    "entities": [
+        {
+            "components": [
+                {
+                    "$type": "Transform",
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                {
+                    "$type": "OrthoCameraComponent",
+                    "active": true,
+                    "aspectPolicy": 0,
+                    "designHeight": 0.0,
+                    "designWidth": 0.0,
+                    "farZ": 1.0,
+                    "layerMask": 4294967295,
+                    "nearZ": -1.0,
+                    "positionX": 0.0,
+                    "positionY": 0.0,
+                    "priority": 0,
+                    "rotationRadians": 0.0,
+                    "viewSize": 6.0,
+                    "viewportAspect": 1.777778,
+                    "zoom": 1.0
+                }
+            ],
+            "id": 1,
+            "name": "Particle Preview Camera"
+        },
+        {
+            "components": [
+                {
+                    "$type": "Transform",
+                    "position": [
+                        -2.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                {
+                    "$type": "ParticleEmitterComponent",
+                    "angularVelocity": [
+                        0.0,
+                        0.0
+                    ],
+                    "autoPlay": true,
+                    "blend": 0,
+                    "burst": 0,
+                    "capacity": 1024,
+                    "columns": 1,
+                    "dimension": 0,
+                    "drag": 0.5,
+                    "duration": 1.0,
+                    "endColor": [
+                        0.3,
+                        0.3,
+                        0.3,
+                        0.0
+                    ],
+                    "endSizeScale": 3.0,
+                    "extent": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "firstFrame": 0,
+                    "frameCount": 1,
+                    "framesPerSecond": 0.0,
+                    "gravity": [
+                        0.0,
+                        0.1,
+                        0.0
+                    ],
+                    "layer": 3,
+                    "lifetime": [
+                        2.0,
+                        3.0
+                    ],
+                    "looping": true,
+                    "rate": 30.0,
+                    "rotation": [
+                        0.0,
+                        0.0
+                    ],
+                    "rows": 1,
+                    "seed": 1,
+                    "shape": 0,
+                    "simulationSpace": 1,
+                    "size": [
+                        0.1,
+                        0.2
+                    ],
+                    "sortingKey": 0,
+                    "startColor": [
+                        0.6,
+                        0.6,
+                        0.6,
+                        0.4
+                    ],
+                    "texturePath": "",
+                    "velocityMax": [
+                        0.2,
+                        1.0,
+                        0.0
+                    ],
+                    "velocityMin": [
+                        -0.2,
+                        0.5,
+                        0.0
+                    ]
+                }
+            ],
+            "id": 2,
+            "name": "Smoke"
+        },
+        {
+            "components": [
+                {
+                    "$type": "Transform",
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                {
+                    "$type": "ParticleEmitterComponent",
+                    "angularVelocity": [
+                        0.0,
+                        0.0
+                    ],
+                    "autoPlay": true,
+                    "blend": 1,
+                    "burst": 60,
+                    "capacity": 1024,
+                    "columns": 1,
+                    "dimension": 0,
+                    "drag": 0.0,
+                    "duration": 1.0,
+                    "endColor": [
+                        1.0,
+                        0.1,
+                        0.0,
+                        0.0
+                    ],
+                    "endSizeScale": 0.0,
+                    "extent": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "firstFrame": 0,
+                    "frameCount": 1,
+                    "framesPerSecond": 0.0,
+                    "gravity": [
+                        0.0,
+                        -6.0,
+                        0.0
+                    ],
+                    "layer": 3,
+                    "lifetime": [
+                        0.3,
+                        1.0
+                    ],
+                    "looping": false,
+                    "rate": 0.0,
+                    "rotation": [
+                        0.0,
+                        0.0
+                    ],
+                    "rows": 1,
+                    "seed": 1,
+                    "shape": 0,
+                    "simulationSpace": 1,
+                    "size": [
+                        0.02,
+                        0.04
+                    ],
+                    "sortingKey": 0,
+                    "startColor": [
+                        1.0,
+                        0.7,
+                        0.1,
+                        1.0
+                    ],
+                    "texturePath": "",
+                    "velocityMax": [
+                        2.0,
+                        4.0,
+                        0.0
+                    ],
+                    "velocityMin": [
+                        -2.0,
+                        1.0,
+                        0.0
+                    ]
+                }
+            ],
+            "id": 3,
+            "name": "Sparks"
+        },
+        {
+            "components": [
+                {
+                    "$type": "Transform",
+                    "position": [
+                        2.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                {
+                    "$type": "ParticleEmitterComponent",
+                    "angularVelocity": [
+                        0.0,
+                        0.0
+                    ],
+                    "autoPlay": true,
+                    "blend": 1,
+                    "burst": 120,
+                    "capacity": 1024,
+                    "columns": 1,
+                    "dimension": 0,
+                    "drag": 2.0,
+                    "duration": 1.0,
+                    "endColor": [
+                        1.0,
+                        0.1,
+                        0.0,
+                        0.0
+                    ],
+                    "endSizeScale": 0.0,
+                    "extent": [
+                        0.1,
+                        0.1,
+                        0.0
+                    ],
+                    "firstFrame": 0,
+                    "frameCount": 1,
+                    "framesPerSecond": 0.0,
+                    "gravity": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "layer": 3,
+                    "lifetime": [
+                        0.3,
+                        0.8
+                    ],
+                    "looping": false,
+                    "rate": 0.0,
+                    "rotation": [
+                        0.0,
+                        0.0
+                    ],
+                    "rows": 1,
+                    "seed": 1,
+                    "shape": 2,
+                    "simulationSpace": 1,
+                    "size": [
+                        0.05,
+                        0.15
+                    ],
+                    "sortingKey": 0,
+                    "startColor": [
+                        1.0,
+                        0.7,
+                        0.1,
+                        1.0
+                    ],
+                    "texturePath": "",
+                    "velocityMax": [
+                        3.0,
+                        3.0,
+                        0.0
+                    ],
+                    "velocityMin": [
+                        -3.0,
+                        -3.0,
+                        0.0
+                    ]
+                }
+            ],
+            "id": 4,
+            "name": "Explosion"
+        }
+    ]
+}
