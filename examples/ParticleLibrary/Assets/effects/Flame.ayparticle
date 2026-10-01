@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 2,
+  "name": "Flame",
+  "duration": 3,
+  "looping": false,
+  "emitters": [
+    {
+      "name": "Flame",
+      "delay": 0,
+      "offset": [
+        0,
+        0,
+        0
+      ],
+      "effect": {
+        "angularVelocity": [
+          -0.1,
+          0.1
+        ],
+        "blend": 1,
+        "burst": 0,
+        "capacity": 256,
+        "colorGradient": [
+          {
+            "time": 0,
+            "color": [
+              1.4,
+              1,
+              0.3,
+              1
+            ]
+          },
+          {
+            "time": 0.35,
+            "color": [
+              1.5,
+              0.35,
+              0.04,
+              1
+            ]
+          },
+          {
+            "time": 1,
+            "color": [
+              0.5,
+              0.04,
+              0.01,
+              0
+            ]
+          }
+        ],
+        "columns": 1,
+        "dimension": 0,
+        "drag": 0.15,
+        "duration": 2.5,
+        "endColor": [
+          0.30000001192092896,
+          0.30000001192092896,
+          0.30000001192092896,
+          0.0
+        ],
+        "endSizeScale": 3.0,
+        "extent": [
+          0.12,
+          0.04,
+          0
+        ],
+        "firstFrame": 0,
+        "frameCount": 1,
+        "framesPerSecond": 0.0,
+        "gravity": [
+          0,
+          0.2,
+          0
+        ],
+        "lifetime": [
+          0.45,
+          0.85
+        ],
+        "looping": true,
+        "opacityCurve": [
+          [
+            0,
+            0
+          ],
+          [
+            0.12,
+            0.85
+          ],
+          [
+            0.55,
+            0.65
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        "rate": 55,
+        "rotation": [
+          -0.15,
+          0.15
+        ],
+        "rows": 1,
+        "seed": 1,
+        "shape": 1,
+        "size": [
+          0.25,
+          0.45
+        ],
+        "sizeCurve": [
+          [
+            0,
+            0.5
+          ],
+          [
+            0.2,
+            1
+          ],
+          [
+            1,
+            0.25
+          ]
+        ],
+        "space": 1,
+        "startColor": [
+          0.6000000238418579,
+          0.6000000238418579,
+          0.6000000238418579,
+          0.4000000059604645
+        ],
+        "texturePath": "textures/flame.png",
+        "velocityMax": [
+          0.1,
+          1.25,
+          0
+        ],
+        "velocityMin": [
+          -0.1,
+          0.7,
+          0
+        ]
+      }
+    }
+  ]
+}

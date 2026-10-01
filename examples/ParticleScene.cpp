@@ -6,7 +6,9 @@
 void createParticleExamples(ayt::entity::World& world) {
     using namespace ayt;
     int index=0;
-    for (const auto& effect:{particle::smoke(),particle::sparks(),particle::explosion()}) {
+    for (auto effect:{particle::smoke(),particle::sparks(),particle::explosion()}) {
+        // Showcase replay only; sparks()/explosion() remain one-shot presets.
+        if (effect.burst) { effect.looping=true; effect.duration=2; }
         auto* actor=world.createEntity();
         auto* transform=actor->addComponent<entity::Transform>();
         transform->position={float(index++-1),0,0};

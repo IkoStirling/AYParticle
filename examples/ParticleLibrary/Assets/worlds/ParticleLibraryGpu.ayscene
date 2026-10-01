@@ -1,0 +1,213 @@
+{
+  "__coordConvention": "ay-coordinates-lh-yup-zfwd-ccw-uvtop-m-v1",
+  "__schemaVersion": 3,
+  "entities": [
+    {
+      "components": [
+        {
+          "$type": "Transform",
+          "position": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "$type": "OrthoCameraComponent",
+          "active": true,
+          "aspectPolicy": 0,
+          "designHeight": 0.0,
+          "designWidth": 0.0,
+          "farZ": 1.0,
+          "layerMask": 4294967295,
+          "nearZ": -1.0,
+          "positionX": 0.0,
+          "positionY": 0.0,
+          "priority": 0,
+          "rotationRadians": 0.0,
+          "viewSize": 6.0,
+          "viewportAspect": 1.777778,
+          "zoom": 1.0
+        }
+      ],
+      "id": 1,
+      "name": "Particle Preview Camera"
+    },
+    {
+      "components": [
+        {
+          "$type": "Transform",
+          "position": [
+            -4,
+            0,
+            0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "$type": "ParticleEffectComponent",
+          "autoPlay": true,
+          "effectPath": "effects/Smoke.ayparticle",
+          "layer": 3,
+          "sortingKey": 0,
+          "backend": 1
+        }
+      ],
+      "id": 2,
+      "name": "Smoke"
+    },
+    {
+      "components": [
+        {
+          "$type": "Transform",
+          "position": [
+            -2,
+            0,
+            0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "$type": "ParticleEffectComponent",
+          "autoPlay": true,
+          "effectPath": "effects/Sparks.ayparticle",
+          "layer": 3,
+          "sortingKey": 0,
+          "backend": 1
+        }
+      ],
+      "id": 3,
+      "name": "Sparks"
+    },
+    {
+      "components": [
+        {
+          "$type": "Transform",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "$type": "ParticleEffectComponent",
+          "autoPlay": true,
+          "effectPath": "effects/Explosion.ayparticle",
+          "layer": 3,
+          "sortingKey": 0,
+          "backend": 1
+        }
+      ],
+      "id": 4,
+      "name": "Explosion"
+    },
+    {
+      "components": [
+        {
+          "$type": "Transform",
+          "position": [
+            2,
+            0,
+            0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "$type": "ParticleEffectComponent",
+          "autoPlay": true,
+          "effectPath": "effects/Flame.ayparticle",
+          "layer": 3,
+          "sortingKey": 0,
+          "backend": 1
+        }
+      ],
+      "id": 5,
+      "name": "Flame"
+    },
+    {
+      "components": [
+        {
+          "$type": "Transform",
+          "position": [
+            4,
+            0,
+            0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "$type": "ParticleEffectComponent",
+          "autoPlay": true,
+          "effectPath": "effects/Rain.ayparticle",
+          "layer": 3,
+          "sortingKey": 0,
+          "backend": 1
+        }
+      ],
+      "id": 6,
+      "name": "Rain"
+    }
+  ]
+}

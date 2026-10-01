@@ -1,0 +1,658 @@
+{
+  "schemaVersion": 3,
+  "name": "Falling Leaves",
+  "seed": 2026,
+  "duration": 6,
+  "looping": true,
+  "backend": 2,
+  "emitters": [
+    {
+      "name": "Foreground leaves",
+      "id": 1,
+      "kind": 0,
+      "offset": [
+        0,
+        1.8,
+        0
+      ],
+      "delay": 0,
+      "enabled": {
+        "mode": 0,
+        "scope": 0,
+        "value": true,
+        "probability": 0.5
+      },
+      "delayValue": {
+        "mode": 0,
+        "scope": 2,
+        "value": 0,
+        "min": 0,
+        "max": 0,
+        "choices": [],
+        "curve": [],
+        "upperCurve": []
+      },
+      "effect": {
+        "angularVelocity": [
+          -0.7,
+          0.7
+        ],
+        "blend": 0,
+        "burst": 0,
+        "capacity": 512,
+        "colorGradient": [],
+        "columns": 4,
+        "dimension": 0,
+        "drag": 0.12,
+        "duration": 6,
+        "endColor": [
+          1,
+          1,
+          1,
+          0
+        ],
+        "endSizeScale": 1,
+        "extent": [
+          2,
+          0.1,
+          0
+        ],
+        "firstFrame": 0,
+        "frameCount": 8,
+        "framesPerSecond": 8,
+        "gravity": [
+          0,
+          -0.08,
+          0
+        ],
+        "lifetime": [
+          3,
+          5
+        ],
+        "looping": true,
+        "opacityCurve": [
+          [
+            0,
+            0
+          ],
+          [
+            0.12,
+            0.85
+          ],
+          [
+            0.8,
+            0.85
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        "rate": 24,
+        "rotation": [
+          -3.141592653589793,
+          3.141592653589793
+        ],
+        "rows": 2,
+        "seed": 17,
+        "shape": 1,
+        "size": [
+          0.18,
+          0.35
+        ],
+        "sizeCurve": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "space": 1,
+        "startColor": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "texturePath": "textures/leaf-flipbook.png",
+        "velocityMax": [
+          0.12,
+          -0.25,
+          0
+        ],
+        "velocityMin": [
+          -0.12,
+          -0.5,
+          0
+        ],
+        "backend": 2,
+        "extensions": {
+          "properties": {
+            "animationFps": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 5,
+              "max": 11,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            },
+            "animationOffset": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 0,
+              "max": 7,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            },
+            "swayAmplitude": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 0.12,
+              "max": 0.45,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            },
+            "swayFrequency": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 0.4,
+              "max": 0.9,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            },
+            "swayPhase": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 0,
+              "max": 6.283185307179586,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            }
+          },
+          "flipX": {
+            "mode": 1,
+            "scope": 2,
+            "value": false,
+            "probability": 0.5
+          },
+          "flipY": {
+            "mode": 0,
+            "scope": 2,
+            "value": false,
+            "probability": 0.5
+          },
+          "reverseAnimation": {
+            "mode": 1,
+            "scope": 2,
+            "value": false,
+            "probability": 0.5
+          },
+          "animationPlayback": 0,
+          "animationOverLifetime": false,
+          "facing": 0,
+          "tiltX": [
+            0,
+            0
+          ],
+          "tiltY": [
+            0,
+            0
+          ],
+          "tumbleX": [
+            0,
+            0
+          ],
+          "tumbleY": [
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "name": "Distant leaves",
+      "id": 2,
+      "kind": 0,
+      "offset": [
+        0,
+        2.4,
+        0
+      ],
+      "delay": 0.4,
+      "enabled": {
+        "mode": 1,
+        "scope": 1,
+        "value": false,
+        "probability": 0.8
+      },
+      "delayValue": {
+        "mode": 2,
+        "scope": 1,
+        "value": 0,
+        "min": 0.1,
+        "max": 0.6,
+        "choices": [],
+        "curve": [],
+        "upperCurve": []
+      },
+      "effect": {
+        "angularVelocity": [
+          -0.7,
+          0.7
+        ],
+        "blend": 0,
+        "burst": 0,
+        "capacity": 512,
+        "colorGradient": [],
+        "columns": 4,
+        "dimension": 0,
+        "drag": 0.12,
+        "duration": 6,
+        "endColor": [
+          1,
+          1,
+          1,
+          0
+        ],
+        "endSizeScale": 1,
+        "extent": [
+          2,
+          0.1,
+          0
+        ],
+        "firstFrame": 0,
+        "frameCount": 8,
+        "framesPerSecond": 8,
+        "gravity": [
+          0,
+          -0.08,
+          0
+        ],
+        "lifetime": [
+          4,
+          5.5
+        ],
+        "looping": true,
+        "opacityCurve": [
+          [
+            0,
+            0
+          ],
+          [
+            0.12,
+            0.85
+          ],
+          [
+            0.8,
+            0.85
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        "rate": 9,
+        "rotation": [
+          -3.141592653589793,
+          3.141592653589793
+        ],
+        "rows": 2,
+        "seed": 17,
+        "shape": 1,
+        "size": [
+          0.08,
+          0.15
+        ],
+        "sizeCurve": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "space": 1,
+        "startColor": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "texturePath": "textures/leaf-flipbook.png",
+        "velocityMax": [
+          0.12,
+          -0.25,
+          0
+        ],
+        "velocityMin": [
+          -0.12,
+          -0.5,
+          0
+        ],
+        "backend": 2,
+        "extensions": {
+          "properties": {
+            "animationFps": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 5,
+              "max": 11,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            },
+            "animationOffset": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 0,
+              "max": 7,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            },
+            "swayAmplitude": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 0.12,
+              "max": 0.45,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            },
+            "swayFrequency": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 0.4,
+              "max": 0.9,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            },
+            "swayPhase": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 0,
+              "max": 6.283185307179586,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            }
+          },
+          "flipX": {
+            "mode": 1,
+            "scope": 2,
+            "value": false,
+            "probability": 0.5
+          },
+          "flipY": {
+            "mode": 0,
+            "scope": 2,
+            "value": false,
+            "probability": 0.5
+          },
+          "reverseAnimation": {
+            "mode": 1,
+            "scope": 2,
+            "value": false,
+            "probability": 0.5
+          },
+          "animationPlayback": 0,
+          "animationOverLifetime": false,
+          "facing": 0,
+          "tiltX": [
+            0,
+            0
+          ],
+          "tiltY": [
+            0,
+            0
+          ],
+          "tumbleX": [
+            0,
+            0
+          ],
+          "tumbleY": [
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "name": "Hero leaf",
+      "id": 3,
+      "kind": 1,
+      "offset": [
+        -1,
+        0,
+        0
+      ],
+      "delay": 1,
+      "enabled": {
+        "mode": 0,
+        "scope": 0,
+        "value": true,
+        "probability": 0.5
+      },
+      "delayValue": {
+        "mode": 0,
+        "scope": 2,
+        "value": 0,
+        "min": 0,
+        "max": 0,
+        "choices": [],
+        "curve": [],
+        "upperCurve": []
+      },
+      "effect": {
+        "angularVelocity": [
+          0.6,
+          1.1
+        ],
+        "blend": 0,
+        "burst": 0,
+        "capacity": 512,
+        "colorGradient": [],
+        "columns": 4,
+        "dimension": 0,
+        "drag": 0.12,
+        "duration": 6,
+        "endColor": [
+          1,
+          1,
+          1,
+          0
+        ],
+        "endSizeScale": 1,
+        "extent": [
+          2,
+          0.1,
+          0
+        ],
+        "firstFrame": 0,
+        "frameCount": 8,
+        "framesPerSecond": 8,
+        "gravity": [
+          0,
+          -0.08,
+          0
+        ],
+        "lifetime": [
+          4.5,
+          4.5
+        ],
+        "looping": true,
+        "opacityCurve": [
+          [
+            0,
+            0
+          ],
+          [
+            0.12,
+            0.85
+          ],
+          [
+            0.8,
+            0.85
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        "rate": 24,
+        "rotation": [
+          -3.141592653589793,
+          3.141592653589793
+        ],
+        "rows": 2,
+        "seed": 17,
+        "shape": 1,
+        "size": [
+          0.7,
+          0.7
+        ],
+        "sizeCurve": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "space": 1,
+        "startColor": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "texturePath": "textures/leaf-flipbook.png",
+        "velocityMax": [
+          0.12,
+          -0.25,
+          0
+        ],
+        "velocityMin": [
+          -0.12,
+          -0.5,
+          0
+        ],
+        "backend": 2,
+        "extensions": {
+          "properties": {
+            "animationFps": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 5,
+              "max": 11,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            },
+            "animationOffset": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 0,
+              "max": 7,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            },
+            "swayAmplitude": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 0.05,
+              "max": 0.1,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            },
+            "swayFrequency": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 0.4,
+              "max": 0.9,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            },
+            "swayPhase": {
+              "mode": 2,
+              "scope": 2,
+              "value": 0,
+              "min": 0,
+              "max": 6.283185307179586,
+              "choices": [],
+              "curve": [],
+              "upperCurve": []
+            }
+          },
+          "flipX": {
+            "mode": 1,
+            "scope": 2,
+            "value": false,
+            "probability": 0.5
+          },
+          "flipY": {
+            "mode": 0,
+            "scope": 2,
+            "value": false,
+            "probability": 0.5
+          },
+          "reverseAnimation": {
+            "mode": 1,
+            "scope": 2,
+            "value": false,
+            "probability": 0.5
+          },
+          "animationPlayback": 0,
+          "animationOverLifetime": false,
+          "facing": 0,
+          "tiltX": [
+            0,
+            0
+          ],
+          "tiltY": [
+            0,
+            0
+          ],
+          "tumbleX": [
+            0,
+            0
+          ],
+          "tumbleY": [
+            0,
+            0
+          ]
+        }
+      }
+    }
+  ]
+}

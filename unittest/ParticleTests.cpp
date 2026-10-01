@@ -1,4 +1,5 @@
 #include <AYParticle/Particle.h>
+#include <AYParticle/EffectAsset.h>
 #include <AYParticle/ParticleGeometry.h>
 #include <cmath>
 #include <iostream>
@@ -97,6 +98,52 @@ int main() {
         check(p.particles().size()==5 && !p.emitting(),"only active interval emits");
         p.update(1); check(p.particles().size()==5,"no later births");
     },failed);
+    test("loop bursts preserve live particles and controls",[] {
+        auto e=burstEffect(2); e.looping=true; e.duration=0.5f;
+        ParticleInstance p(e); p.play(); p.update(0);
+        p.update(0.25f); check(p.particles().size()==2,"no early replay");
+        p.update(0.25f); check(p.particles().size()==4,"burst at cycle boundary");
+        check(near(p.particles()[0].age,0.5f) && near(p.particles()[2].age,0),"existing particles survive replay");
+        check(p.particles()[2].birthId==3,"replay preserves birth sequence");
+        p.update(0); check(p.particles().size()==4,"no duplicate boundary");
+        p.pause(); p.update(10); check(p.particles().size()==4,"pause freezes cycle");
+        p.resume(); p.update(0.5f); check(p.particles().size()==6,"resume retains phase");
+        p.stop(); p.update(1); check(p.particles().size()==6,"stop disables later bursts");
+        p.play(); p.update(0); check(p.particles().size()==2 && p.particles()[0].birthId==1,"play explicitly restarts");
+    },failed);
+    test("loop burst birth ages match split updates",[] {
+        auto e=burstEffect(2); e.looping=true; e.duration=0.25f;
+        e.velocityMin={-1,0,0}; e.velocityMax={1,0,0};
+        ParticleInstance a(e),b(e); a.play(); b.play(); a.update(0); b.update(0);
+        a.update(1.125f); for (int i=0;i<9;++i) b.update(0.125f);
+        check(a.particles().size()==10 && b.particles().size()==10,"all crossed cycles fire");
+        for (size_t i=0;i<a.particles().size();++i) {
+            check(near(a.particles()[i].age,b.particles()[i].age),"birth ages independent of frame size");
+            check(near(a.particles()[i].position.x,b.particles()[i].position.x),"RNG and motion continue across cycles");
+        }
+    },failed);
+    test("loop burst stalls and budgets have no backlog",[] {
+        auto e=burstEffect(20); e.looping=true; e.duration=0.5f; e.capacity=4; e.lifetime={0.2f,0.2f};
+        ParticleInstance p(e); p.play(); p.update(100.125f);
+        check(p.particles().size()==4 && p.droppedBirths()==4016,"bounded latest burst after stall");
+        for (const auto& v:p.particles()) check(near(v.age,0.125f),"latest burst age");
+        p.update(0.5f,{},2); check(p.particles().size()==2,"replay honors global budget");
+        p.update(0); check(p.particles().size()==2,"dropped births do not catch up");
+        e.duration=0.000001f; p.setEffect(e); p.play(); p.update(1000000);
+        check(p.particles().size()<=4 && p.droppedBirths()>0,"extremely many cycles stay bounded");
+    },failed);
+    test("short presets and repeating showcase",[] {
+        for (auto e:{sparks(),explosion()}) {
+            ParticleInstance once(e); once.play(); once.update(1.25f);
+            check(once.finished(),"gameplay preset remains one shot");
+            once.update(2); check(once.particles().empty(),"one shot does not replay");
+            e.looping=true; e.duration=2;
+            ParticleInstance preview(e); preview.play(); preview.update(1.25f);
+            check(preview.particles().empty() && preview.emitting(),"preview waits for replay");
+            preview.update(1); check(preview.particles().size()==e.burst,"visible after opening delay");
+            preview.update(2); check(preview.particles().size()==e.burst,"later cycles remain visible");
+        }
+    },failed);
     test("appearance and top-left atlas",[] {
         auto e=burstEffect(); e.size={2,2}; e.endSizeScale=3;
         e.startColor={1,0,0,1}; e.endColor={0,0,1,0};
@@ -118,10 +165,83 @@ int main() {
         e=burstEffect(); e.rows=0; check(!e.validate(),"invalid atlas");
         e=burstEffect(); e.shape=Shape::Sphere; check(!e.validate(),"3D shape needs 3D");
     },failed);
+    test("lifetime tracks sample boundaries and alpha precedence",[] {
+        auto e=burstEffect(); e.size={2,2}; e.endSizeScale=9;
+        e.sizeCurve={{0,0.5f},{0.25f,2},{1,0}};
+        e.opacityCurve={{0,0},{0.25f,1},{0.75f,1},{1,0}};
+        e.colorGradient={{0,{1,0,0,0.3f}},{0.5f,{0,1,0,0.3f}},{1,{0,0,1,0.3f}}};
+        ParticleInstance instance(e); Particle p; p.initialSize=2; p.life=4;
+        check(near(instance.sample(p).size,1) && near(instance.sample(p).color.a,0),"birth keys");
+        p.age=1; auto s=instance.sample(p);
+        check(near(s.size,4) && near(s.color.r,0.5f) && near(s.color.g,0.5f) && near(s.color.a,1),"exact size key, gradient interpolation, absolute alpha override");
+        p.age=2; s=instance.sample(p);
+        check(near(s.size,8.0f/3) && near(s.color.g,1),"piecewise segment");
+        p.age=5; s=instance.sample(p);
+        check(near(s.size,0) && near(s.color.b,1) && near(s.color.a,0),"death clamped");
+        p.age=-1; check(near(instance.sample(p).size,1),"negative age clamped");
+        e.opacityCurve.clear(); instance.setEffect(e); p.age=2;
+        check(near(instance.sample(p).color.a,0.3f),"gradient alpha without opacity override");
+        e.colorGradient.clear(); e.sizeCurve.clear(); e.startColor={1,0,0,1}; e.endColor={0,0,1,0}; instance.setEffect(e);
+        s=instance.sample(p); check(near(s.size,10) && near(s.color.a,0.5f) && near(s.color.r,0.5f),"legacy empty-track fallback");
+        check(near(sampleCurve({},0.5f,7),7),"empty helper fallback");
+    },failed);
+    test("lifetime tracks validate transactionally",[] {
+        auto e=burstEffect(); ParticleInstance p(e); p.play(); p.update(0);
+        for(const auto& keys:std::vector<std::vector<CurveKey>>{
+            {{0,1}},{{0.1f,1},{1,0}},{{0,1},{0.5f,1},{0.5f,2},{1,0}},
+            {{0,1},{0.8f,1},{0.2f,2},{1,0}},{{0,-1},{1,0}},
+            {{0,1},{1,std::numeric_limits<float>::infinity()}}}) {
+            e.sizeCurve=keys; check(!p.setEffect(e),"invalid track rejected");
+            check(p.particles().size()==1 && p.effect().sizeCurve.empty(),"running state retained");
+        }
+        e=burstEffect(); e.opacityCurve={{0,1.1f},{1,0}}; check(!e.validate(),"alpha bounded");
+        e=burstEffect(); e.colorGradient={{0,{1,1,1,-0.1f}},{1,{}}}; check(!e.validate(),"gradient alpha bounded");
+        e.colorGradient={{0,{2,3,4,1}},{1,{}}}; check(e.validate(),"HDR gradient valid");
+        e.sizeCurve.clear(); for(size_t i=0;i<33;++i)e.sizeCurve.push_back({float(i)/32,1});
+        check(!e.validate(),"bounded key count");
+        e.sizeCurve.pop_back(); e.sizeCurve.back().time=1; check(e.validate(),"32 keys valid");
+    },failed);
+    test("curved presets share 2D and 3D sampling",[] {
+        for(auto e:{smoke(),sparks(),explosion()}) {
+            check(!e.sizeCurve.empty() && !e.opacityCurve.empty() && !e.colorGradient.empty(),"preset tracks authored");
+            Particle p; p.age=0.3f; p.life=1; p.initialSize=1;
+            ParticleInstance two(e); const auto a=two.sample(p);
+            e.dimension=Dimension::ThreeD; ParticleInstance three(e); const auto b=three.sample(p);
+            check(a.color==b.color && a.size==b.size,"dimension-independent lifetime appearance");
+        }
+    },failed);
     test("bounded stalled emission",[] {
         auto e=smoke(); e.capacity=16; e.rate=1000000;
         ParticleInstance p(e); p.play(); p.update(100);
         check(p.particles().size()<=16 && p.droppedBirths()>0,"stall work bounded");
+    },failed);
+    test("composition delay offset and transport",[] {
+        auto a=combinedExplosion(); a.emitters[1].offset={2,0,0};
+        EffectInstance p(a); p.play(); Pose pose; pose.position={10,0,0}; p.update(0,pose);
+        check(p.instances()[0].particles().size()==1 && p.instances()[1].particles().size()==60,"flash and sparks start together");
+        check(p.instances()[1].particles()[0].position.x==12,"parent plus emitter offset");
+        check(p.instances()[2].particles().empty(),"smoke delayed");
+        p.pause(); p.update(1); check(p.time()==0,"composition pause");
+        p.resume(); p.update(0.2f,pose); check(!p.instances()[2].particles().empty(),"smoke starts after delay");
+        p.stop(true); p.update(10); check(p.finished() && p.liveParticles()==0,"stop cancels all pending emission");
+        p.play(); p.stop(); p.update(1); check(p.liveParticles()==0,"stop before delayed start");
+    },failed);
+    test("composition replay stalls and shared spawn allowance",[] {
+        auto a=combinedExplosion(); a.looping=true; a.duration=2;
+        EffectInstance p(a); p.play(); p.update(0,{},2);
+        check(p.liveParticles()==2,"all children share allowance");
+        p.update(100.125f,{},2); check(p.liveParticles()<=2 && near(float(p.time()),100.125f),"stalled cycles bounded");
+        check(near(p.instances()[1].particles()[0].age,0.125f),"current cycle age");
+        p.stop(true); p.play(); p.update(0); p.update(2.125f);
+        check(!p.instances()[1].particles().empty(),"short effects replay after delay");
+    },failed);
+    test("composition validation bounds and uniqueness",[] {
+        auto a=combinedExplosion(); check(a.validate(),"default composite valid");
+        a.emitters[1].name=a.emitters[0].name; check(!a.validate(),"duplicate name rejected");
+        a=combinedExplosion(); a.emitters[0].delay=a.duration; check(!a.validate(),"delay outside cycle rejected");
+        a=combinedExplosion(); for(auto& e:a.emitters) e.effect.capacity=65536;
+        check(!a.validate(),"aggregate capacity bounded");
+        a.emitters.clear(); check(!a.validate(),"empty composition rejected");
     },failed);
     test("billboard basis and 16-bit batch bounds",[] {
         ParticleSample s; s.size=2; s.position={1,2,3};
@@ -130,6 +250,54 @@ int main() {
         std::vector<ParticleSample> samples(16384);
         bool rejected=false; try { (void)buildGeometry(samples,ParticleEffect{}); } catch(const std::invalid_argument&) { rejected=true; }
         check(rejected,"batch too large rejected");
+    },failed);
+
+    test("typed sources and independent frozen scopes",[] {
+        NumberProperty n; n.mode=NumberMode::Uniform; n.min=0;n.max=7;
+        check(n.sampleWhole(0,0,0)==0&&n.sampleWhole(0,.999999f,0)==7,"inclusive frame range");
+        n.mode=NumberMode::Weighted;n.choices={{9,0},{2,1},{8,3}};
+        check(n.sample(0,0,0)==2&&n.sample(0,.9f,0)==8,"weighted ignores zero weights");
+        n.mode=NumberMode::BetweenCurves;n.curve={{0,1},{1,3}};n.upperCurve={{0,3},{1,5}};
+        check(near(n.sample(.5f,.25f,0),2.5f),"stable blend between curves");
+        n.value=std::numeric_limits<float>::quiet_NaN();check(!n.validate(0,10),"dormant nonfinite values rejected");
+        const auto r=propertyRandom(1,2,0,1,SampleScope::EffectPlay);
+        check(r==propertyRandom(1,2,8,99,SampleScope::EffectPlay),"play scope ignores cycle and birth");
+        check(propertyRandom(1,2,8,1,SampleScope::EffectCycle)==propertyRandom(1,2,8,99,SampleScope::EffectCycle),"cycle scope ignores birth");
+        auto e=burstEffect();e.burst=12;e.capacity=16;
+        e.flipX={BoolMode::Probability,SampleScope::ParticleBirth,false,.5f};
+        e.value(FloatAttribute::Size)={NumberMode::Uniform,SampleScope::EffectPlay,0,2,3};
+        ParticleInstance a(e);a.play();a.update(0);const auto first=a.particles()[0];
+        for(const auto& p:a.particles())check(p.initialSize==first.initialSize,"play size shared");
+        a.update(.1f);check(a.particles()[0].flipX==first.flipX,"boolean frozen after birth");
+        e.value(FloatAttribute::AnimationFps)={NumberMode::Uniform,SampleScope::ParticleBirth,0,3,9};
+        ParticleInstance b(e);b.play();b.update(0);
+        check(first.flipX==b.particles()[0].flipX&&first.initialSize==b.particles()[0].initialSize,"unrelated property edits preserve streams");
+        b.play();b.update(0);check(b.particles()[0].flipX==first.flipX,"seeded replay");
+        e.value(FloatAttribute::EmissionRate)={NumberMode::Constant,SampleScope::ParticleBirth,2};check(!e.validate(),"invalid emission scope rejected");
+    },failed);
+    test("flipbook modes mirrored cells and actual 3D planes",[] {
+        auto e=burstEffect();e.columns=4;e.frameCount=4;e.framesPerSecond=2;
+        e.reverseAnimation.value=true;e.flipX.value=true;e.animationPlayback=AnimationPlayback::Once;
+        ParticleInstance a(e);a.play();a.update(0);auto p=a.particles()[0];p.age=1;
+        auto sample=a.sample(p);check(sample.frame==1&&sample.flipX,"reverse once");
+        auto g=buildGeometry(std::span(&sample,1),e);check(g.vertices[0].u>g.vertices[1].u,"mirror only current cell");
+        e.reverseAnimation.value=false;e.animationPlayback=AnimationPlayback::PingPong;ParticleInstance b(e);p.reverseAnimation=false;p.age=2;
+        check(b.sample(p).frame==2,"ping pong returns after last");
+        e.animationOverLifetime=true;e.animationPlayback=AnimationPlayback::Once;ParticleInstance c(e);p.age=p.life;check(c.sample(p).frame==3,"normalized life ends on final frame");
+        e.size={2,2};e.dimension=Dimension::ThreeD;e.facing=ParticleFacing::Plane;e.tiltY={1.570796326f,1.570796326f};
+        ParticleInstance plane(e);plane.play();plane.update(0);auto card=plane.sample(plane.particles()[0]);
+        check(card.oriented&&std::abs(card.right.z)>.99f&&std::abs(card.right.x)<.001f,"plane tilts into Z");
+        g=buildGeometry(std::span(&card,1),e);check(std::abs(g.vertices[0].z-g.vertices[1].z)>.9f,"true oriented geometry");
+    },failed);
+    test("heterogeneous layer gate delay and stable IDs",[] {
+        auto a=fallingLeaves();a.looping=false;
+        a.emitters[0].kind=EffectLayerKind::SpriteAnimation;a.emitters[0].effect.burst=99;a.emitters[0].effect.rate=99;
+        a.emitters[1].enabled={BoolMode::Probability,SampleScope::EffectCycle,true,0};
+        EffectInstance instance(a);instance.play();instance.update(0);
+        check(instance.instances()[0].particles().size()==1&&instance.instances()[1].particles().empty(),"sprite layer one card and probability zero gate");
+        auto seed=layerSeed(a,0);std::swap(a.emitters[0],a.emitters[1]);a.emitters[1].name="Renamed";
+        check(layerSeed(a,1)==seed,"stable ID survives reorder and rename");
+        a.emitters[0].id=a.emitters[1].id;check(!a.validate(),"duplicate stable IDs rejected");
     },failed);
     return failed ? 1 : 0;
 }

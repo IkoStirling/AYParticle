@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "gpu-particle-runtime-windows",
+  "target": { "platform": "windows", "architecture": "x64", "configuration": "Development" },
+  "code": {
+    "enabled": true,
+    "backend": "cmake",
+    "sourceDirectory": ".",
+    "configurePreset": "windows-debug-vs2026-insider",
+    "buildPreset": "windows-debug-vs2026-insider",
+    "target": "AYParticle_GpuDemo",
+    "artifact": "out/build/windows-debug-vs2026-insider/AYRuntime/AYParticle/AYParticle_GpuDemo.exe"
+  },
+  "content": {
+    "assetRoot": "AYRuntime/AYParticle/examples/ParticleLibrary/Assets",
+    "outputSubdirectory": "Content",
+    "defaultTransform": "exclude", "defaultStorage": "loose", "rules": []
+  },
+  "cache": { "enabled": true, "root": "out/particle-gpu-runtime/cache", "policy": "auto" },
+  "package": { "output": "out/particle-gpu-runtime/package", "compression": "zstd", "atomic": true },
+  "run": { "workingDirectory": ".", "arguments": ["--no-child-processes"] }
+}

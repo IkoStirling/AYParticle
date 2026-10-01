@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 3,
+  "name": "GPU Rain",
+  "seed": 2026,
+  "duration": 4,
+  "looping": true,
+  "backend": 2,
+  "emitters": [
+    {
+      "name": "Rain drops",
+      "id": 1,
+      "kind": 0,
+      "offset": [
+        0,
+        3,
+        0
+      ],
+      "delay": 0,
+      "enabled": {
+        "mode": 0,
+        "scope": 0,
+        "value": true,
+        "probability": 0.5
+      },
+      "delayValue": {
+        "mode": 0,
+        "scope": 2,
+        "value": 0,
+        "min": 0,
+        "max": 0,
+        "choices": [],
+        "curve": [],
+        "upperCurve": []
+      },
+      "effect": {
+        "angularVelocity": [
+          0,
+          0
+        ],
+        "blend": 0,
+        "burst": 0,
+        "capacity": 4096,
+        "colorGradient": [],
+        "columns": 1,
+        "dimension": 0,
+        "drag": 0,
+        "duration": 4,
+        "endColor": [
+          0.5,
+          0.75,
+          1,
+          0
+        ],
+        "endSizeScale": 1,
+        "extent": [
+          3,
+          0.1,
+          0
+        ],
+        "firstFrame": 0,
+        "frameCount": 1,
+        "framesPerSecond": 0,
+        "gravity": [
+          0,
+          -1,
+          0
+        ],
+        "lifetime": [
+          0.65,
+          1
+        ],
+        "looping": true,
+        "opacityCurve": [],
+        "rate": 2000,
+        "rotation": [
+          0,
+          0
+        ],
+        "rows": 1,
+        "seed": 17,
+        "shape": 1,
+        "size": [
+          0.025,
+          0.045
+        ],
+        "sizeCurve": [],
+        "space": 1,
+        "startColor": [
+          0.5,
+          0.75,
+          1,
+          0.85
+        ],
+        "texturePath": "",
+        "velocityMax": [
+          0.15,
+          -7,
+          0
+        ],
+        "velocityMin": [
+          -0.15,
+          -9,
+          0
+        ],
+        "backend": 2,
+        "extensions": {}
+      }
+    }
+  ]
+}

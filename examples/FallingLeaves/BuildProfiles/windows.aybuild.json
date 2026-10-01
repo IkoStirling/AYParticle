@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "falling-leaves-windows",
+  "target": {
+    "platform": "windows",
+    "architecture": "x64",
+    "configuration": "Development"
+  },
+  "code": {
+    "enabled": true,
+    "backend": "cmake",
+    "sourceDirectory": ".",
+    "configurePreset": "windows-debug-vs2026-insider",
+    "buildPreset": "windows-debug-vs2026-insider",
+    "target": "AYParticle_LibraryPlayer",
+    "artifact": "out/build/windows-debug-vs2026-insider/AYParticle_LibraryPlayer.exe"
+  },
+  "content": {
+    "assetRoot": "AYRuntime/AYParticle/examples/FallingLeaves/Assets",
+    "outputSubdirectory": "Content",
+    "defaultTransform": "exclude",
+    "defaultStorage": "loose",
+    "rules": [
+      {
+        "match": "effects/**/*.ayparticle",
+        "transform": "cook",
+        "storage": "pak:particles",
+        "cookTextures": true
+      },
+      {
+        "match": "textures/**/*.png",
+        "transform": "cook",
+        "storage": "pak:particles",
+        "cookTextures": true
+      },
+      {
+        "match": "worlds/**/*.ayscene",
+        "transform": "raw",
+        "storage": "loose"
+      }
+    ]
+  },
+  "cache": {
+    "enabled": true,
+    "root": "out/particle-leaves/cache",
+    "policy": "auto"
+  },
+  "package": {
+    "output": "out/particle-leaves/package",
+    "compression": "zstd",
+    "atomic": true
+  },
+  "run": {
+    "workingDirectory": ".",
+    "arguments": [
+      "--leaves",
+      "--gpu"
+    ]
+  }
+}

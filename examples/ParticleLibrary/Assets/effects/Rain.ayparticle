@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 2,
+  "name": "Rain",
+  "duration": 3,
+  "looping": false,
+  "emitters": [
+    {
+      "name": "Rain",
+      "delay": 0,
+      "offset": [
+        0,
+        1.8,
+        0
+      ],
+      "effect": {
+        "angularVelocity": [
+          0,
+          0
+        ],
+        "blend": 0,
+        "burst": 0,
+        "capacity": 512,
+        "colorGradient": [
+          {
+            "time": 0,
+            "color": [
+              0.65,
+              0.8,
+              1,
+              1
+            ]
+          },
+          {
+            "time": 1,
+            "color": [
+              0.65,
+              0.8,
+              1,
+              1
+            ]
+          }
+        ],
+        "columns": 1,
+        "dimension": 0,
+        "drag": 0,
+        "duration": 2.5,
+        "endColor": [
+          0.30000001192092896,
+          0.30000001192092896,
+          0.30000001192092896,
+          0.0
+        ],
+        "endSizeScale": 3.0,
+        "extent": [
+          1.6,
+          0.04,
+          0
+        ],
+        "firstFrame": 0,
+        "frameCount": 1,
+        "framesPerSecond": 0.0,
+        "gravity": [
+          0,
+          -0.5,
+          0
+        ],
+        "lifetime": [
+          0.7,
+          0.95
+        ],
+        "looping": true,
+        "opacityCurve": [
+          [
+            0,
+            0
+          ],
+          [
+            0.05,
+            0.5
+          ],
+          [
+            0.9,
+            0.5
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        "rate": 100,
+        "rotation": [
+          -0.06,
+          -0.06
+        ],
+        "rows": 1,
+        "seed": 1,
+        "shape": 1,
+        "size": [
+          0.22,
+          0.32
+        ],
+        "sizeCurve": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "space": 1,
+        "startColor": [
+          0.6000000238418579,
+          0.6000000238418579,
+          0.6000000238418579,
+          0.4000000059604645
+        ],
+        "texturePath": "textures/rain.png",
+        "velocityMax": [
+          -0.2,
+          -4,
+          0
+        ],
+        "velocityMin": [
+          -0.3,
+          -4.5,
+          0
+        ]
+      }
+    }
+  ]
+}

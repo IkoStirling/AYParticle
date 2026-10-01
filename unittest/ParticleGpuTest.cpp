@@ -1,5 +1,10 @@
 #include <AYRenderer/ParticleDraw.h>
 #include <AYParticle/ParticleGeometry.h>
+#include <AYParticle/EffectResource.h>
+#include <AYResource/ResourceManager.h>
+#include <AYResource/AssetPath.h>
+#include <AYResource/assetsDefs/ITexture.h>
+#include <filesystem>
 #include "detail/Forward2DOpaquePass.h"
 #include "detail/TransparentPass.h"
 #include "detail/PassExecContext.h"
@@ -73,12 +78,13 @@ struct Fixture {
         if(bgfx::isValid(readback)) adapter.destroy(readback);
         adapter.shutdown(); if(window) DestroyWindow(window);
     }
-    Pixel draw(bool world,BlendMode blend,float depthClear,float alpha,bool layered=false) {
+    Pixel draw(bool world,BlendMode blend,float depthClear,float alpha,bool layered=false,particle::Color tint={1,0,0,1},const particle::ParticleEffect* authored=nullptr,uint32_t atlasFrame=0) {
         materials.at(1).blendMode=blend;
-        particle::ParticleSample s; s.position={0,0,0.5f}; s.size=1; s.color={1,0,0,alpha};
+        particle::ParticleSample s; s.position={0,0,0.5f}; s.size=1; s.color=tint; s.color.a=alpha;
+        s.frame=atlasFrame;
         std::array<particle::ParticleSample,2> samples{s,s};
         samples[1].position.z=0.75f; samples[1].color={0,1,0,alpha};
-        const auto g=particle::buildGeometry(std::span(samples).first(layered?2:1),particle::ParticleEffect{});
+        const auto g=particle::buildGeometry(std::span(samples).first(layered?2:1),authored?*authored:particle::ParticleEffect{});
         ParticleDrawData batch; batch.vertices.resize(g.vertices.size()); batch.indices=g.indices;
         std::memcpy(batch.vertices.data(),g.vertices.data(),g.vertices.size()*sizeof(particle::Vertex));
         RenderScene scene; DrawPayload2D payload; DrawItem item;
@@ -102,9 +108,36 @@ struct Fixture {
     }
 };
 }
-int main() {
+int main(int argc,char** argv) {
     try {
         Fixture f;
+        if(argc==3 && (std::string(argv[1])=="--package"||std::string(argv[1])=="--package-leaves")) {
+            const auto content=std::filesystem::absolute(argv[2]);
+            particle::registerEffectResourceLoader();
+            auto& manager=resource::ResourceManager::instance();
+            require(manager.openDatabase((content/"resources.db").string()),"package database mount");
+            resource::setAssetRoot(content.string());
+            const std::vector<const char*> names=std::string(argv[1])=="--package-leaves"?std::vector<const char*>{"FallingLeaves"}:std::vector<const char*>{"Smoke","Sparks","Explosion","Flame","Rain"};
+            for(const char* name:names) {
+                const auto path=std::string("effects/")+name+".ayparticle";
+                auto value=manager.load<particle::EffectResource>(resource::resolveAssetPath({},path));
+                require(value && !manager.hasLoadFailed(path),"pak effect load");
+                for(const auto& emitter:value->asset()->emitters) {
+                    auto texture=manager.load<resource::ITexture>(emitter.effect.texturePath);
+                    require(texture && texture->getFormat()==resource::TextureFormat::RGBA8,"pak RGBA texture");
+                    f.adapter.destroy(f.textures.at(1).handle);
+                    f.textures.at(1).handle=f.adapter.createTexture2D(static_cast<uint16_t>(texture->getWidth()),static_cast<uint16_t>(texture->getHeight()),texture->getMipmapData());
+                    particle::ParticleInstance instance(emitter.effect);
+                    particle::Particle sample; sample.age=.3f; sample.life=1;
+                    const auto color=instance.sample(sample).color;
+                    const auto pixel=f.draw(false,emitter.effect.blend==particle::Blend::Alpha?BlendMode::Alpha:BlendMode::Additive,
+                        1,color.a,false,color,&emitter.effect,emitter.effect.firstFrame);
+                    require(pixel[0]+pixel[1]+pixel[2]>.01f,"packaged sprite produces visible D3D11 pixels");
+                }
+                std::cout<<"PASS packaged D3D11 pixels: "<<name<<'\n';
+            }
+            return 0;
+        }
         auto p=f.draw(false,BlendMode::Alpha,0,0.5f);
         require(p[0]>0.45f && p[0]<0.55f && p[3]>0.45f && p[3]<0.55f,"2D alpha/color and no depth test");
         p=f.draw(false,BlendMode::Additive,0,0.5f);
@@ -117,6 +150,16 @@ int main() {
         require(p[0]>0.45f && p[0]<0.55f,"3D additive lifetime fade");
         p=f.draw(true,BlendMode::Alpha,1,0.5f,true);
         require(p[0]>0.20f && p[0]<0.30f && p[1]>0.45f && p[1]<0.55f,"3D particle depth writes stay disabled");
+        particle::ParticleEffect effect;
+        effect.opacityCurve={{0,0},{0.5f,0.8f},{1,0}};
+        effect.colorGradient={{0,{1,0,0,1}},{0.5f,{0,1,0,1}},{1,{0,0,1,1}}};
+        particle::ParticleInstance instance(effect); particle::Particle particle;
+        particle.age=0.25f; particle.life=1;
+        const auto color=instance.sample(particle).color;
+        for(bool world:{false,true}) {
+            p=f.draw(world,BlendMode::Alpha,1,color.a,false,color);
+            require(p[0]>0.17f && p[0]<0.23f && p[1]>0.17f && p[1]<0.23f && p[2]<0.01f,"curved opacity/gradient reach 2D and 3D GPU pixels");
+        }
         std::cout<<"PASS real D3D11 particle color, alpha, additive fade and depth occlusion\n";
         return 0;
     } catch(const std::exception& e) { std::cerr<<"FAIL "<<e.what()<<'\n'; return 1; }

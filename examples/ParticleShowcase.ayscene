@@ -75,6 +75,35 @@
                     "blend": 0,
                     "burst": 0,
                     "capacity": 1024,
+                    "colorGradient": [
+                        {
+                            "color": [
+                                0.6,
+                                0.6,
+                                0.6,
+                                0.4
+                            ],
+                            "time": 0.0
+                        },
+                        {
+                            "color": [
+                                0.5,
+                                0.5,
+                                0.5,
+                                0.4
+                            ],
+                            "time": 0.35
+                        },
+                        {
+                            "color": [
+                                0.3,
+                                0.3,
+                                0.3,
+                                0.0
+                            ],
+                            "time": 1.0
+                        }
+                    ],
                     "columns": 1,
                     "dimension": 0,
                     "drag": 0.5,
@@ -105,6 +134,24 @@
                         3.0
                     ],
                     "looping": true,
+                    "opacityCurve": [
+                        [
+                            0.0,
+                            0.0
+                        ],
+                        [
+                            0.15,
+                            0.4
+                        ],
+                        [
+                            0.55,
+                            0.3
+                        ],
+                        [
+                            1.0,
+                            0.0
+                        ]
+                    ],
                     "rate": 30.0,
                     "rotation": [
                         0.0,
@@ -117,6 +164,20 @@
                     "size": [
                         0.1,
                         0.2
+                    ],
+                    "sizeCurve": [
+                        [
+                            0.0,
+                            1.0
+                        ],
+                        [
+                            0.2,
+                            2.0
+                        ],
+                        [
+                            1.0,
+                            3.0
+                        ]
                     ],
                     "sortingKey": 0,
                     "startColor": [
@@ -172,10 +233,39 @@
                     "blend": 1,
                     "burst": 60,
                     "capacity": 1024,
+                    "colorGradient": [
+                        {
+                            "color": [
+                                1.0,
+                                1.0,
+                                0.7,
+                                1.0
+                            ],
+                            "time": 0.0
+                        },
+                        {
+                            "color": [
+                                1.0,
+                                0.7,
+                                0.1,
+                                1.0
+                            ],
+                            "time": 0.2
+                        },
+                        {
+                            "color": [
+                                1.0,
+                                0.1,
+                                0.0,
+                                0.0
+                            ],
+                            "time": 1.0
+                        }
+                    ],
                     "columns": 1,
                     "dimension": 0,
                     "drag": 0.0,
-                    "duration": 1.0,
+                    "duration": 2.0,
                     "endColor": [
                         1.0,
                         0.1,
@@ -201,7 +291,21 @@
                         0.3,
                         1.0
                     ],
-                    "looping": false,
+                    "looping": true,
+                    "opacityCurve": [
+                        [
+                            0.0,
+                            1.0
+                        ],
+                        [
+                            0.2,
+                            1.0
+                        ],
+                        [
+                            1.0,
+                            0.0
+                        ]
+                    ],
                     "rate": 0.0,
                     "rotation": [
                         0.0,
@@ -214,6 +318,20 @@
                     "size": [
                         0.02,
                         0.04
+                    ],
+                    "sizeCurve": [
+                        [
+                            0.0,
+                            1.0
+                        ],
+                        [
+                            0.25,
+                            0.8
+                        ],
+                        [
+                            1.0,
+                            0.0
+                        ]
                     ],
                     "sortingKey": 0,
                     "startColor": [
@@ -269,10 +387,39 @@
                     "blend": 1,
                     "burst": 120,
                     "capacity": 1024,
+                    "colorGradient": [
+                        {
+                            "color": [
+                                1.0,
+                                1.0,
+                                0.7,
+                                1.0
+                            ],
+                            "time": 0.0
+                        },
+                        {
+                            "color": [
+                                1.0,
+                                0.7,
+                                0.1,
+                                1.0
+                            ],
+                            "time": 0.2
+                        },
+                        {
+                            "color": [
+                                1.0,
+                                0.1,
+                                0.0,
+                                0.0
+                            ],
+                            "time": 1.0
+                        }
+                    ],
                     "columns": 1,
                     "dimension": 0,
                     "drag": 2.0,
-                    "duration": 1.0,
+                    "duration": 2.0,
                     "endColor": [
                         1.0,
                         0.1,
@@ -298,7 +445,21 @@
                         0.3,
                         0.8
                     ],
-                    "looping": false,
+                    "looping": true,
+                    "opacityCurve": [
+                        [
+                            0.0,
+                            1.0
+                        ],
+                        [
+                            0.2,
+                            1.0
+                        ],
+                        [
+                            1.0,
+                            0.0
+                        ]
+                    ],
                     "rate": 0.0,
                     "rotation": [
                         0.0,
@@ -311,6 +472,20 @@
                     "size": [
                         0.05,
                         0.15
+                    ],
+                    "sizeCurve": [
+                        [
+                            0.0,
+                            1.0
+                        ],
+                        [
+                            0.25,
+                            0.8
+                        ],
+                        [
+                            1.0,
+                            0.0
+                        ]
                     ],
                     "sortingKey": 0,
                     "startColor": [
