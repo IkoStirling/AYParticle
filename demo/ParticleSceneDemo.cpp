@@ -13,7 +13,7 @@ int main(int argc,char** argv) {
     if (!world.initialize()) return 1;
     auto* camera=world.createEntity(); camera->setName("Particle Preview Camera");
     camera->addComponent<entity::Transform>();
-    auto* ortho=camera->addComponent<entity::OrthoCameraComponent>();
+    auto* ortho=camera->createComponent<entity::OrthoCameraComponent>();
     ortho->viewSize=6;
     int i=0;
     const char* names[]={"Smoke","Sparks","Explosion"};
