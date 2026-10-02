@@ -79,7 +79,7 @@ float opacityTrack(float age,float fallback) {
     }
     return u_gpOpacity[count-1].y;
 }
-vec3 worldVector(vec3 value) { return u_gp[12].xyz*value.x+u_gp[13].xyz*value.y; }
+vec3 worldVector(vec3 value) { return u_gp[12].xyz*value.x+u_gp[13].xyz*value.y+u_gp[17].xyz*value.z; }
 float randomValue(float slot, float generation, float salt) {
     return fract(sin(slot*12.9898+generation*78.233+salt*37.719+u_gp[0].w)*43758.5453);
 }
@@ -109,10 +109,16 @@ void main() {
         float r1=randomValue(float(id),data.w,1.0);
         p=vec4(0.0,0.0,0.0,0.0);
         if(u_gp[5].w>0.5&&u_gp[5].w<1.5) p.xy=(vec2(r0,r1)*2.0-vec2(1.0,1.0))*u_gp[6].xy;
-        if(u_gp[5].w>1.5) p.xy=vec2(cos(r0*6.283185307),sin(r0*6.283185307))*sqrt(r1)*u_gp[6].xy;
+        if(u_gp[5].w>1.5&&u_gp[5].w<2.5) p.xy=vec2(cos(r0*6.283185307),sin(r0*6.283185307))*sqrt(r1)*u_gp[6].xy;
+        if(u_gp[5].w>2.5&&u_gp[5].w<3.5) p.xyz=(vec3(r0,r1,randomValue(float(id),data.w,6.0))*2.0-vec3(1.0,1.0,1.0))*u_gp[6].xyz;
+        if(u_gp[5].w>3.5) {
+            float z=randomValue(float(id),data.w,6.0)*2.0-1.0;
+            float radius=pow(randomValue(float(id),data.w,7.0),1.0/3.0);
+            float xy=sqrt(max(0.0,1.0-z*z))*radius;
+            p.xyz=vec3(cos(r0*6.283185307)*xy,sin(r0*6.283185307)*xy,z*radius)*u_gp[6].xyz;
+        }
         v=vec4(mix(u_gp[2].xyz,u_gp[3].xyz,vec3(randomValue(float(id),data.w,2.0),
-            randomValue(float(id),data.w,3.0),0.0)), mix(u_gp[7].x,u_gp[7].y,r0));
-        v.z=0.0;
+            randomValue(float(id),data.w,3.0),randomValue(float(id),data.w,8.0))), mix(u_gp[7].x,u_gp[7].y,r0));
         if(u_gp[1].w>0.5) { p.xyz=u_gp[5].xyz+worldVector(p.xyz); v.xyz=worldVector(v.xyz); }
         data.x=mix(u_gp[7].z,u_gp[7].w,r1);
         data.y=mix(u_gp[8].x,u_gp[8].y,randomValue(float(id),data.w,4.0));
@@ -150,10 +156,13 @@ void main() {
         vec3 center=p.xyz;
         center.x+=motion.y*(sin(6.283185307*motion.z*p.w+motion.w)-sin(motion.w));
         vec3 offset=vec3(rotated,0.0);
-        if(u_gp[1].w<0.5) { center=u_gp[5].xyz+worldVector(center); offset=worldVector(offset); }
-        vertices[vertex]=vec4(center+offset,1.0);
+        if(u_gp[1].w<0.5) center=u_gp[5].xyz+worldVector(center);
+        if(u_gp[17].w<0.5) {
+            if(u_gp[1].w<0.5) offset=worldVector(offset);
+            vertices[vertex]=vec4(center+offset,1.0);
+        } else vertices[vertex]=vec4(center,2.0);
         vec2 atlasUv=(cell+vec2((flags&1u)!=0u?1.0-uv.x:uv.x,(flags&2u)!=0u?uv.y:1.0-uv.y))/vec2(columns,rows);
-        vertices[vertex+1u]=vec4(atlasUv,0.0,0.0);
+        vertices[vertex+1u]=vec4(atlasUv,u_gp[17].w>0.5?rotated:vec2(0.0,0.0));
         vertices[vertex+2u]=color;
     }
 }
@@ -192,7 +201,15 @@ inline constexpr const char* vertex=R"(
 $input a_position, a_texcoord0, a_color0
 $output v_uv, v_color
 #include <bgfx_shader.sh>
-void main() { gl_Position=mul(u_viewProj,vec4(a_position.xyz,1.0)); v_uv=a_texcoord0.xy; v_color=a_color0; }
+void main() {
+    vec3 position=a_position.xyz;
+    if(a_position.w>1.5) {
+        vec3 right=vec3(u_view[0][0],u_view[1][0],u_view[2][0]);
+        vec3 up=vec3(u_view[0][1],u_view[1][1],u_view[2][1]);
+        position+=right*a_texcoord0.z+up*a_texcoord0.w;
+    }
+    gl_Position=mul(u_viewProj,vec4(position,1.0)); v_uv=a_texcoord0.xy; v_color=a_color0;
+}
 )";
 inline constexpr const char* fragment=R"(
 $input v_uv, v_color

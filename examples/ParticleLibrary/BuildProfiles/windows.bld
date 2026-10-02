@@ -15,9 +15,9 @@
     "assetRoot": "AYRuntime/AYParticle/examples/ParticleLibrary/Assets", "outputSubdirectory": "Content",
     "defaultTransform": "exclude", "defaultStorage": "loose",
     "rules": [
-      { "match": "effects/**/*.ayparticle", "transform": "cook", "storage": "pak:particles", "cookTextures": true },
+      { "match": "effects/**/*.pfx", "transform": "cook", "storage": "pak:particles", "cookTextures": true },
       { "match": "textures/**/*.png", "transform": "cook", "storage": "pak:particles", "cookTextures": true },
-      { "match": "worlds/**/*.ayscene", "transform": "raw", "storage": "loose" }
+      { "match": "worlds/**/*.scn", "transform": "raw", "storage": "loose" }
     ]
   },
   "cache": { "enabled": true, "root": "out/particle-library/cache", "policy": "auto" },

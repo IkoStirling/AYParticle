@@ -1,7 +1,7 @@
 # Falling Leaves
 
-Open `Assets/effects/FallingLeaves.ayparticle` in AYEditor, or use the packaged
-`FallingLeaves.ayscene`. The effect combines three independently timed layers:
+Open `Assets/effects/FallingLeaves.pfx` in AYEditor, or use the packaged
+`FallingLeaves.scn`. The effect combines three independently timed layers:
 
 - Foreground particle leaves fall with smooth lateral sway, random spin/size.
 - Distant leaves have 80% enable probability per composition cycle and random delay.
@@ -10,7 +10,7 @@ Open `Assets/effects/FallingLeaves.ayparticle` in AYEditor, or use the packaged
 The original 4×2 RGBA flipbook depicts front/back rotation. Each birth chooses
 animation speed (5–11 FPS), a starting frame (including the last frame), mirror
 and playback direction. Those choices stay fixed through the particle's life.
-This illustrates an animated 2D silhouette; `TumblingLeaves3D.ayparticle` also
+This illustrates an animated 2D silhouette; `TumblingLeaves3D.pfx` also
 uses actual CPU plane orientation with random tilt and angular tumble in 3D.
 The native editor opens it in a perspective scene with depth occlusion; right-drag
 to inspect the tumble. GPU supports the 2D asset; 3D uses CPU.
@@ -32,7 +32,7 @@ Build and package from the engine root:
 
 ```powershell
 cmake --build --preset windows-debug-vs2026-insider --target AYParticle_LibraryPlayer project_build_tool
-out/build/windows-debug-vs2026-insider/AYRuntime/AYTool/project_build_tool/project_build_tool.exe --project . --profile AYRuntime/AYParticle/examples/FallingLeaves/BuildProfiles/windows.aybuild.json --skip-code
+out/build/windows-debug-vs2026-insider/AYRuntime/AYTool/project_build_tool/project_build_tool.exe --project . --profile AYRuntime/AYParticle/examples/FallingLeaves/BuildProfiles/windows.bld --skip-code
 out/particle-leaves/package/AYParticle_LibraryPlayer.exe --leaves --gpu --verify
 out/particle-leaves/package/AYParticle_LibraryPlayer.exe --leaves --gpu
 ```
@@ -58,21 +58,21 @@ out/build/windows-debug-vs2026-insider/AYRuntime/AYParticle/AYParticle_GpuTest.e
 
 ### Native editor runtime preview
 
-Open `TumblingLeaves3D.ayparticle`: the canvas starts in perspective 3D with a
+Open `TumblingLeaves3D.pfx`: the canvas starts in perspective 3D with a
 simple ground/grid and test cube. Right-drag to orbit, wheel to zoom and Focus to
 fit the leaves. Object depth hides leaves behind the cube; Ground/Object toggles
 let you isolate the visual. Select 2D screen and CPU/GPU/Auto to compare the 2D
-`FallingLeaves.ayparticle`. GPU mode simulates the same composition without CPU
+`FallingLeaves.pfx`. GPU mode simulates the same composition without CPU
 particle arrays; the status reports a whole-composition fallback when unsupported.
 Hide/Solo and background do not alter the effect file. Timeline seeking is capped
 to 60 seconds; GPU replay advances one 60 Hz step per rendered frame with progress.
-`GpuRain.ayparticle` provides a texture-free 2D GPU rain/drop preview.
+`GpuRain.pfx` provides a texture-free 2D GPU rain/drop preview.
 
 ### Authoring a composite effect
 
-Open `Assets/effects/AutumnGust.ayparticle` for a complete 2D example: near
+Open `Assets/effects/AutumnGust.pfx` for a complete 2D example: near
 flipbook leaves, delayed dust (the default soft disc), and a separate hero-leaf
-SpriteAnimation. `Assets/worlds/AutumnGust.ayscene` mounts the same resource on a
+SpriteAnimation. `Assets/worlds/AutumnGust.scn` mounts the same resource on a
 ParticleEffectComponent, so the saved editor result is usable by Scene playback
 and included in the package profile.
 

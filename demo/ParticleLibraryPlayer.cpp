@@ -42,7 +42,7 @@ void verify(const fs::path& content,bool gpu,bool leaves,bool gust) {
     auto* renderer=new render::RendererSubSystem();
     game::SubSystemRegistry::instance().registerSubSystem(renderer);
     require(renderer->initialize(),"Verification renderer initialization");
-    require(entity::loadScene(world,(content/(gust?"worlds/AutumnGust.ayscene":leaves?"worlds/FallingLeaves.ayscene":gpu?"worlds/ParticleLibraryGpu.ayscene":"worlds/ParticleLibrary.ayscene")).string()),"Showcase scene load");
+    require(entity::loadScene(world,(content/(gust?"worlds/AutumnGust.scn":leaves?"worlds/FallingLeaves.scn":gpu?"worlds/ParticleLibraryGpu.scn":"worlds/ParticleLibrary.scn")).string()),"Showcase scene load");
     std::vector<entity::Entity*> effects;
     for(auto* entity:world.query<entity::ParticleEffectComponent>()) effects.push_back(entity);
     require(effects.size()==(foliage?1:5),"Expected showcase effects");
@@ -118,7 +118,7 @@ int main(int argc,char** argv) {
         project.assetRoot=content.string(); project.enablePhysics=false;
         project.width=1280; project.height=720;
         project.startupWorld="showcase";
-        project.worlds={{.id="showcase",.scenePath=gust?"worlds/AutumnGust.ayscene":leaves?"worlds/FallingLeaves.ayscene":gpu?"worlds/ParticleLibraryGpu.ayscene":"worlds/ParticleLibrary.ayscene",.sceneName="Particle Library"}};
+        project.worlds={{.id="showcase",.scenePath=gust?"worlds/AutumnGust.scn":leaves?"worlds/FallingLeaves.scn":gpu?"worlds/ParticleLibraryGpu.scn":"worlds/ParticleLibrary.scn",.sceneName="Particle Library"}};
         float elapsed=0; size_t frames=0,peak=0,peakGpu=0,peakGpuDraws=0;
         bool systemsReady=false;
         auto& loop=game::GameLoop::instance();

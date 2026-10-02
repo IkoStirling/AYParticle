@@ -34,12 +34,12 @@ int main() {
         effect.backend=particle::Backend::Gpu;
         effect.emitters.push_back({"Smoke",{},0,particle::smoke()});
         effect.emitters[0].effect.texturePath="textures/shared.tga";
-        const auto owner=assets/"effects/nested/a.ayparticle";
+        const auto owner=assets/"effects/nested/a.pfx";
         check(particle::saveEffectAsset(owner.string(),effect),"save nested effect");
-        check(particle::saveEffectAsset((assets/"effects/b.ayparticle").string(),effect),"save sharing effect");
+        check(particle::saveEffectAsset((assets/"effects/b.pfx").string(),effect),"save sharing effect");
         particle::EffectSource closure; std::string error;
         check(particle::inspectEffectSource(owner,assets,closure,&error),"inspect: "+error);
-        check(closure.logicalPath=="effects/nested/a.ayparticle" && closure.textures.size()==1,"preserved nested path");
+        check(closure.logicalPath=="effects/nested/a.pfx" && closure.textures.size()==1,"preserved nested path");
         effect.emitters[0].effect.texturePath="../../textures/shared.tga";
         check(particle::saveEffectAsset(owner.string(),effect),"owner-relative effect");
         check(particle::inspectEffectSource(owner,assets,closure),"owner-relative reference");
@@ -57,7 +57,7 @@ int main() {
         profile.schemaVersion=1; profile.id="particle-test"; profile.platform="windows";
         profile.architecture="x64"; profile.configuration="Development";
         profile.content.defaultTransform=resource::ProjectAssetTransform::Exclude;
-        profile.content.rules={{"effects/**/*.ayparticle",resource::ProjectAssetTransform::Cook,resource::ProjectAssetStorage::Pak,"particles",true},
+        profile.content.rules={{"effects/**/*.pfx",resource::ProjectAssetTransform::Cook,resource::ProjectAssetStorage::Pak,"particles",true},
             {"textures/**/*.tga",resource::ProjectAssetTransform::Raw,resource::ProjectAssetStorage::Loose,"particles",true}};
         profile.package.output="out/package";
         auto plan=resource::ProjectBuildPlanner::create(profile,root.string());
@@ -78,11 +78,11 @@ int main() {
         check(!resource::ProjectBuildPlanner::create(excluded,root.string()).valid(),"excluded dependency diagnosed");
         fs::create_directories(assets/"worlds");
         {
-            std::ofstream stream(assets/"worlds/broken.ayscene");
-            stream<<R"({"entities":[{"components":[{"$type":"ParticleEffectComponent","effectPath":"effects/missing.ayparticle"}]}]})";
+            std::ofstream stream(assets/"worlds/broken.scn");
+            stream<<R"({"entities":[{"components":[{"$type":"ParticleEffectComponent","effectPath":"effects/missing.pfx"}]}]})";
         }
         auto scenes=profile;
-        scenes.content.rules.push_back({"worlds/**/*.ayscene",resource::ProjectAssetTransform::Raw,resource::ProjectAssetStorage::Loose,"",true});
+        scenes.content.rules.push_back({"worlds/**/*.scn",resource::ProjectAssetTransform::Raw,resource::ProjectAssetStorage::Loose,"",true});
         check(!resource::ProjectBuildPlanner::create(scenes,root.string()).valid(),"scene missing effect preflight");
 
         particle::registerEffectResourceLoader(); resource::initializeLoaders();
@@ -90,8 +90,8 @@ int main() {
         const auto content=root/"out/package/Content";
         check(manager.openDatabase((content/"resources.db").string()),"mount published DB");
         resource::setAssetRoot(content.string());
-        const auto logical=resource::resolveAssetPath({},"effects/nested/a.ayparticle");
-        check(logical=="effects/nested/a.ayparticle","root mount preserves package logical key");
+        const auto logical=resource::resolveAssetPath({},"effects/nested/a.pfx");
+        check(logical=="effects/nested/a.pfx","root mount preserves package logical key");
         // Source and raw texture copies cannot satisfy this load.
         fs::remove_all(assets); fs::remove_all(content/"textures");
         auto value=manager.load<particle::EffectResource>(logical);
@@ -122,7 +122,7 @@ int main() {
         auto packed=resource::cookShipPackage(ship);
         check(packed.ok && packed.fileCount==2 && packed.dependencyCount==1,"CookShip typed particle closure: "+packed.error);
         // Non-recursive packing must not inspect excluded nested authoring files.
-        const auto invalid=fs::path(options.outputDir)/"deep/invalid.ayparticle";
+        const auto invalid=fs::path(options.outputDir)/"deep/invalid.pfx";
         fs::create_directories(invalid.parent_path());
         { std::ofstream stream(invalid); stream<<"invalid"; }
         auto nonrecursive=ship; nonrecursive.recursive=false; nonrecursive.outputDir=(root/"nonrecursive").string();
@@ -135,9 +135,9 @@ int main() {
         fs::create_directories(rawAssets/"effects"); fs::create_directories(rawAssets/"textures");
         fs::copy_file(fs::path(options.outputDir)/imported.conversion.dependencies[0].to,rawAssets/"textures/ready.aytex");
         effect.emitters[0].effect.texturePath="../textures/ready.aytex";
-        check(particle::saveEffectAsset((rawAssets/"effects/raw.ayparticle").string(),effect),"raw reference fixture");
+        check(particle::saveEffectAsset((rawAssets/"effects/raw.pfx").string(),effect),"raw reference fixture");
         auto rawProfile=profile; rawProfile.content.assetRoot="RawAssets";
-        rawProfile.content.rules={{"**/*.ayparticle",resource::ProjectAssetTransform::Raw,resource::ProjectAssetStorage::Pak,"particles",true},
+        rawProfile.content.rules={{"**/*.pfx",resource::ProjectAssetTransform::Raw,resource::ProjectAssetStorage::Pak,"particles",true},
             {"**/*.aytex",resource::ProjectAssetTransform::Raw,resource::ProjectAssetStorage::Pak,"particles",true}};
         check(!resource::ProjectBuildPlanner::create(rawProfile,root.string()).valid(),"raw owner-relative package dependency rejected");
         const auto priorSize=fs::file_size(packed.pakPath);

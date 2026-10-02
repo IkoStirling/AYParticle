@@ -1,6 +1,6 @@
 # Particle Library
 
-Five ready-to-use schema-2 effects. Open `Assets/worlds/ParticleLibrary.ayscene`
+Five ready-to-use schema-2 effects. Open `Assets/worlds/ParticleLibrary.scn`
 in the editor to see them from left to right:
 
 | Effect | Visible behavior | Suitable uses |
@@ -28,7 +28,7 @@ developer environment:
 
 ```powershell
 cmake --build --preset windows-debug-vs2026-insider --target AYParticle_LibraryPlayer project_build_tool
-out/build/windows-debug-vs2026-insider/AYRuntime/AYTool/project_build_tool/project_build_tool.exe --project . --profile AYRuntime/AYParticle/examples/ParticleLibrary/BuildProfiles/windows.aybuild.json --skip-code
+out/build/windows-debug-vs2026-insider/AYRuntime/AYTool/project_build_tool/project_build_tool.exe --project . --profile AYRuntime/AYParticle/examples/ParticleLibrary/BuildProfiles/windows.bld --skip-code
 out/particle-library/package/AYParticle_LibraryPlayer.exe --verify
 out/particle-library/package/AYParticle_LibraryPlayer.exe
 ```
@@ -66,7 +66,7 @@ player checks pass. This example keeps its cache under `out/particle-library`.
 
 ## GPU scene variant
 
-Open `Assets/worlds/ParticleLibraryGpu.ayscene` in the editor, or run the rebuilt
+Open `Assets/worlds/ParticleLibraryGpu.scn` in the editor, or run the rebuilt
 package player with `--gpu --play-seconds 5`. All five effects use seven GPU
 emitters, including curved smoke/flame and the animated explosion. The Scene
 Inspector backend choice overrides the resource; unsupported configurations

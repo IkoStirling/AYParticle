@@ -68,7 +68,7 @@
                 {
                     "$type": "ParticleEffectComponent",
                     "autoPlay": true,
-                    "effectPath": "effects/CombinedExplosion.ayparticle",
+                    "effectPath": "effects/CombinedExplosion.pfx",
                     "layer": 3,
                     "sortingKey": 0
                 }

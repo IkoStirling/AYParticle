@@ -124,8 +124,32 @@ void verify(GpuParticleContext& context) {
     emitter.play(); emitter.update(0,0); state=snapshot(emitter);
     check(state.alive==5&&state.slots[0].age==0&&state.slots[0].position.x==0,"restart clears/reseeds GPU state");
     emitter.stop(true); emitter.update(0,0); state=snapshot(emitter); check(state.alive==0,"stop(true) clears GPU state");
-    std::string error; auto invalid=e; invalid.dimension=Dimension::ThreeD;
-    check(!GpuEmitter::validate(invalid,&error)&&!error.empty(),"unsupported 3D fails explicitly");
+    std::string error; auto three=e; three.dimension=Dimension::ThreeD;
+    three.shape=Shape::Box; three.extent={.2f,.3f,.4f};
+    three.velocityMin=three.velocityMax={0,0,1}; three.gravity={};
+    check(GpuEmitter::validate(three,&error),"3D billboard box is supported");
+    GpuEmitter volume(context,three); volume.play(); volume.update(0,0);
+    state=snapshot(volume);
+    check(state.alive==5,"3D box births");
+    for(size_t slot=0;slot<5;++slot) {
+        const auto p=state.slots[slot].position;
+        check(std::abs(p.x)<=.20001f&&std::abs(p.y)<=.30001f&&std::abs(p.z)<=.40001f,
+            "3D box respects XYZ half-extents");
+    }
+    const float initialZ=state.slots[0].position.z;
+    volume.update(0,.1f); state=snapshot(volume);
+    check(std::abs(state.slots[0].position.z-initialZ-.1f)<.0001f,
+        "3D GPU velocity advances Z");
+    auto billboard=three; billboard.shape=Shape::Point; billboard.burst=1;
+    billboard.velocityMin=billboard.velocityMax={};
+    GpuEmitter card(context,billboard); card.play(); card.update(0,0);
+    setupView(10,128,128,target.fbo); card.draw(10);
+    const auto threePixel=target.center();
+    check(threePixel[0]>.2f&&threePixel[1]<.08f,
+        "3D camera-facing billboard produces visible pixels");
+    auto invalid=three; invalid.facing=ParticleFacing::Plane;
+    check(!GpuEmitter::validate(invalid,&error)&&!error.empty(),
+        "oriented 3D planes fall back explicitly");
     bool rejected=false; try { emitter.update(0,.5f); } catch(const std::invalid_argument&) { rejected=true; }
     check(rejected,"unbounded dt is rejected");
     // Continuous birth ring, including saturation/overwriting living slots.

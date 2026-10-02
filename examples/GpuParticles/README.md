@@ -110,7 +110,7 @@ Recommended gameplay acquisition is the existing particle component, with
 Legacy resources remain CPU by default. `ParticleEffectComponent.backend=3`
 inherits its resource; 0/1/2 override CPU/GPU/Auto. The integration switches a
 whole composition and displays `backendStatus` when it falls back: unsupported
-build/device, 3D/shape, RGBA8 texture acquisition, GPU program creation or World budget.
+build/device, oriented 3D planes, RGBA8 texture acquisition, GPU program creation or World budget.
 
 The editor's **Scene backend** choice supports undo/save/reload. Scene Inspector
 play/pause/restart/stop/step affects GPU transport; the Scene viewport renders the
@@ -120,7 +120,7 @@ is allocated slots and `liveParticles` is the exact CPU count. Renderer-owned
 scene callbacks release GPU resources before World/device shutdown. Frame compute
 view 243 precedes overlay 246, which composites before Bloom/postprocessing.
 
-Open `ParticleLibrary/Assets/worlds/ParticleLibraryGpu.ayscene` for Smoke, Sparks,
+Open `ParticleLibrary/Assets/worlds/ParticleLibraryGpu.scn` for Smoke, Sparks,
 Explosion, Flame and Rain. The same cook profile packages both scenes and their
 sprite closure. After building/repackaging, run:
 
@@ -144,7 +144,7 @@ environment:
 
 ```powershell
 cmake --build --preset windows-debug-vs2026-insider --target AYParticle_GpuDemo AYParticle_ShaderBinaryTests project_build_tool
-out/build/windows-debug-vs2026-insider/AYRuntime/AYTool/project_build_tool/project_build_tool.exe --project . --profile AYRuntime/AYParticle/examples/GpuParticles/BuildProfiles/windows.aybuild.json --skip-code
+out/build/windows-debug-vs2026-insider/AYRuntime/AYTool/project_build_tool/project_build_tool.exe --project . --profile AYRuntime/AYParticle/examples/GpuParticles/BuildProfiles/windows.bld --skip-code
 out/particle-gpu-runtime/package/AYParticle_GpuDemo.exe --verify --no-child-processes
 out/particle-gpu-runtime/package/AYParticle_GpuDemo.exe --no-child-processes
 ```

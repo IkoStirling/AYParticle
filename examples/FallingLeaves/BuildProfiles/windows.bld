@@ -22,7 +22,7 @@
     "defaultStorage": "loose",
     "rules": [
       {
-        "match": "effects/**/*.ayparticle",
+        "match": "effects/**/*.pfx",
         "transform": "cook",
         "storage": "pak:particles",
         "cookTextures": true
@@ -34,7 +34,7 @@
         "cookTextures": true
       },
       {
-        "match": "worlds/**/*.ayscene",
+        "match": "worlds/**/*.scn",
         "transform": "raw",
         "storage": "loose"
       }

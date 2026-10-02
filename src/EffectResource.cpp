@@ -1,4 +1,5 @@
 #include <AYParticle/EffectResource.h>
+#include <AYAssetFormat/AssetFormat.h>
 #include <AYParticle/EffectAssetIO.h>
 #include <AYResource/ResourceRegistry.h>
 #include <AYResource/ResourceManager.h>
@@ -12,7 +13,7 @@ void resolveTextures(EffectAsset& asset,const std::string& owner) {
 }
 class Loader final : public ayt::resource::IResourceLoader {
 public:
-    bool canLoad(const std::string& path) const override { return path.ends_with(".ayparticle"); }
+    bool canLoad(const std::string& path) const override { return ayt::asset_format::matchesPath(path, ayt::asset_format::Id::ParticleEffect); }
     const char* getResourceType() const override { return "ParticleEffect"; }
     std::shared_ptr<ayt::resource::IResource> load(const std::string& path) override {
         auto value=std::make_shared<EffectResource>(); return value->load(path)?value:nullptr;
@@ -30,7 +31,10 @@ std::unique_ptr<ayt::resource::IResourceLoader> createLoader() { return std::mak
 void registerEffectResourceLoader() {
     static std::once_flag once;
     std::call_once(once,[] {
-        ayt::resource::ResourceRegistry::registerExtension(".ayparticle","ParticleEffect");
+        const auto& format = ayt::asset_format::describe(ayt::asset_format::Id::ParticleEffect);
+        ayt::resource::ResourceRegistry::registerExtension(std::string(format.suffix), "ParticleEffect");
+        for (const auto alias : format.readAliases)
+            ayt::resource::ResourceRegistry::registerExtension(std::string(alias), "ParticleEffect");
         ayt::resource::ResourceRegistry::registerLoader("ParticleEffect",&createLoader);
     });
 }

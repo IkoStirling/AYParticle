@@ -8,7 +8,7 @@
 #include <iostream>
 int main(int argc,char** argv) {
     using namespace ayt;
-    if(argc!=2 && argc!=3) { std::cerr<<"Usage: AYParticle_SceneDemo output.ayscene [effects/example.ayparticle]\n"; return 2; }
+    if(argc!=2 && argc!=3) { std::cerr<<"Usage: AYParticle_SceneDemo output.scn [effects/example.pfx]\n"; return 2; }
     entity::bootstrapEntityCore();
     auto& world=entity::World::instance();
     if (!world.initialize()) return 1;

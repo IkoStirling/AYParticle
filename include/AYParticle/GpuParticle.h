@@ -29,8 +29,9 @@ struct GpuParticleSnapshot {
     std::array<Vec3,64> firstVertex{};
 };
 /// GPU-owned state and compute-generated quad vertices, no per-frame particle upload.
-/// Supports 2D World/Local Point/Rectangle/Disk, lifetime tracks and sprite atlases.
-/// Other dimensions/shapes are rejected; scene integration falls back to CPU.
+/// Supports 2D World/Local Point/Rectangle/Disk and 3D camera-facing billboards,
+/// including Box/Sphere births, lifetime tracks and sprite atlases.
+/// Oriented planes are rejected; scene integration falls back to CPU.
 /// A fixed slot ring replaces oldest births on overflow. No sorting/compaction.
 class GpuEmitter {
 public:
@@ -49,7 +50,7 @@ public:
     /// At most once per emitter per submitted frame. dt must be finite, 0..0.25s.
     /// Compute view must execute before its draw view. This overload uses translation only.
     void update(uint16_t computeView, float dt, Vec3 position = {});
-    /// Full 2D emitter basis; allowance bounds births without deferring a backlog.
+    /// Full emitter basis; allowance bounds births without deferring a backlog.
     void updatePose(uint16_t computeView, float dt, const Pose& pose, uint32_t allowance=UINT32_MAX);
     /// Uses the caller-configured view transform, target and viewport; no depth writes.
     void draw(uint16_t drawView);

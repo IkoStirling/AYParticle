@@ -85,8 +85,10 @@ bool GpuEmitter::validate(const ParticleEffect& e,std::string* error) {
     if(!e.validate(error)) return false;
     const auto fail=[&](const char* text){ if(error) *error=text; return false; };
     if(e.duration<.001f) return fail("GPU emission duration must be at least 1ms");
-    if(e.dimension!=Dimension::TwoD || (e.shape!=Shape::Point && e.shape!=Shape::Rectangle&&e.shape!=Shape::Disk))
-        return fail("GPU supports 2D Point/Rectangle/Disk only");
+    if(e.facing!=ParticleFacing::Billboard)
+        return fail("GPU supports camera-facing billboards only");
+    if(e.dimension==Dimension::TwoD && (e.shape==Shape::Box || e.shape==Shape::Sphere))
+        return fail("GPU 2D supports Point/Rectangle/Disk only");
     if(e.framesPerSecond>1000000) return fail("GPU atlas FPS exceeds supported range");
     if(error) error->clear(); return true;
 }
@@ -171,15 +173,17 @@ void GpuEmitter::updatePose(uint16_t view,float dt,const Pose& pose,uint32_t all
     auto& p=i.params;
     p[0]={float(e.capacity),i.paused?0:dt,i.clear?1.0f:0.0f,float(i.instanceSeed)};
     p[1]={float(start),float(count),0,float(e.space)};
-    p[2]={e.velocityMin.x,e.velocityMin.y,0,0}; p[3]={e.velocityMax.x,e.velocityMax.y,0,0};
-    p[4]={e.gravity.x,e.gravity.y,0,e.drag};
+    p[2]={e.velocityMin.x,e.velocityMin.y,e.dimension==Dimension::ThreeD?e.velocityMin.z:0,0};
+    p[3]={e.velocityMax.x,e.velocityMax.y,e.dimension==Dimension::ThreeD?e.velocityMax.z:0,0};
+    p[4]={e.gravity.x,e.gravity.y,e.dimension==Dimension::ThreeD?e.gravity.z:0,e.drag};
     p[5]={position.x,position.y,position.z,float(e.shape)};
-    p[6]={e.extent.x,e.extent.y,0,0}; p[7]={e.lifetime.min,e.lifetime.max,e.size.min,e.size.max};
+    p[6]={e.extent.x,e.extent.y,e.dimension==Dimension::ThreeD?e.extent.z:0,0}; p[7]={e.lifetime.min,e.lifetime.max,e.size.min,e.size.max};
     p[8]={e.rotation.min,e.rotation.max,e.angularVelocity.min,e.angularVelocity.max};
     p[9]={e.startColor.r,e.startColor.g,e.startColor.b,e.startColor.a};
     p[10]={e.endColor.r,e.endColor.g,e.endColor.b,e.endColor.a};
     p[11]={e.endSizeScale,float(e.sizeCurve.size()),float(e.opacityCurve.size()),float(e.colorGradient.size())};
     p[12]={pose.right.x,pose.right.y,pose.right.z,0}; p[13]={pose.up.x,pose.up.y,pose.up.z,0};
+    p[17]={pose.forward.x,pose.forward.y,pose.forward.z,e.dimension==Dimension::ThreeD?1.f:0.f};
     p[14]={float(e.columns),float(e.rows),float(e.firstFrame),float(e.frameCount)};
     p[15]={e.framesPerSecond,float(e.animationPlayback),e.animationOverLifetime?1.f:0.f,0};
     p[16]={float(std::fmod(i.time,double(e.duration))/e.duration),0,0,0};
@@ -201,6 +205,7 @@ void GpuEmitter::draw(uint16_t view) {
     bgfx::setVertexBuffer(0,i.vertices); bgfx::setIndexBuffer(i.indices);
     bgfx::setTexture(0,i.context->sampler,i.texture);
     uint64_t state=BGFX_STATE_WRITE_RGB|BGFX_STATE_WRITE_A|BGFX_STATE_MSAA;
+    if(i.effect.dimension==Dimension::ThreeD) state|=BGFX_STATE_DEPTH_TEST_LEQUAL;
     state|=i.effect.blend==Blend::Additive?BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA,BGFX_STATE_BLEND_ONE,BGFX_STATE_BLEND_ZERO,BGFX_STATE_BLEND_ONE)
         :BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA,BGFX_STATE_BLEND_INV_SRC_ALPHA,BGFX_STATE_BLEND_ONE,BGFX_STATE_BLEND_INV_SRC_ALPHA);
     bgfx::setState(state); bgfx::submit(view,i.context->draw);

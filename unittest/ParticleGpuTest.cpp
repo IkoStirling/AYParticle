@@ -119,7 +119,7 @@ int main(int argc,char** argv) {
             resource::setAssetRoot(content.string());
             const std::vector<const char*> names=std::string(argv[1])=="--package-leaves"?std::vector<const char*>{"FallingLeaves"}:std::vector<const char*>{"Smoke","Sparks","Explosion","Flame","Rain"};
             for(const char* name:names) {
-                const auto path=std::string("effects/")+name+".ayparticle";
+                const auto path=std::string("effects/")+name+".pfx";
                 auto value=manager.load<particle::EffectResource>(resource::resolveAssetPath({},path));
                 require(value && !manager.hasLoadFailed(path),"pak effect load");
                 for(const auto& emitter:value->asset()->emitters) {

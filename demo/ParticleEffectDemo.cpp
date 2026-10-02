@@ -1,7 +1,7 @@
 #include <AYParticle/EffectAssetIO.h>
 #include <iostream>
 int main(int argc,char** argv) {
-    if(argc!=2 && argc!=3) { std::cerr<<"Usage: AYParticle_EffectDemo output.ayparticle [combined|smoke|sparks]\n"; return 2; }
+    if(argc!=2 && argc!=3) { std::cerr<<"Usage: AYParticle_EffectDemo output.pfx [combined|smoke|sparks]\n"; return 2; }
     auto asset=ayt::particle::combinedExplosion(); asset.looping=true;
     if(argc==3) {
         const std::string preset=argv[2];

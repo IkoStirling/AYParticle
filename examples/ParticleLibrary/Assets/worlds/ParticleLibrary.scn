@@ -68,10 +68,9 @@
         {
           "$type": "ParticleEffectComponent",
           "autoPlay": true,
-          "effectPath": "effects/Smoke.ayparticle",
+          "effectPath": "effects/Smoke.pfx",
           "layer": 3,
-          "sortingKey": 0,
-          "backend": 1
+          "sortingKey": 0
         }
       ],
       "id": 2,
@@ -101,10 +100,9 @@
         {
           "$type": "ParticleEffectComponent",
           "autoPlay": true,
-          "effectPath": "effects/Sparks.ayparticle",
+          "effectPath": "effects/Sparks.pfx",
           "layer": 3,
-          "sortingKey": 0,
-          "backend": 1
+          "sortingKey": 0
         }
       ],
       "id": 3,
@@ -134,10 +132,9 @@
         {
           "$type": "ParticleEffectComponent",
           "autoPlay": true,
-          "effectPath": "effects/Explosion.ayparticle",
+          "effectPath": "effects/Explosion.pfx",
           "layer": 3,
-          "sortingKey": 0,
-          "backend": 1
+          "sortingKey": 0
         }
       ],
       "id": 4,
@@ -167,10 +164,9 @@
         {
           "$type": "ParticleEffectComponent",
           "autoPlay": true,
-          "effectPath": "effects/Flame.ayparticle",
+          "effectPath": "effects/Flame.pfx",
           "layer": 3,
-          "sortingKey": 0,
-          "backend": 1
+          "sortingKey": 0
         }
       ],
       "id": 5,
@@ -200,10 +196,9 @@
         {
           "$type": "ParticleEffectComponent",
           "autoPlay": true,
-          "effectPath": "effects/Rain.ayparticle",
+          "effectPath": "effects/Rain.pfx",
           "layer": 3,
-          "sortingKey": 0,
-          "backend": 1
+          "sortingKey": 0
         }
       ],
       "id": 6,

@@ -47,7 +47,8 @@ bool inspectEffectSource(const fs::path& file, const fs::path& assetRoot,
             auto extension=target.extension().string();
             std::transform(extension.begin(),extension.end(),extension.begin(),[](unsigned char c){ return char(std::tolower(c)); });
             if(extension!=".png" && extension!=".jpg" && extension!=".jpeg" && extension!=".bmp"
-               && extension!=".tga" && extension!=".dds" && extension!=".aytex")
+               && extension!=".tga" && extension!=".dds"
+               && extension!=".txr" && extension!=".aytex")
                 return fail("Unsupported particle texture: "+text);
             source.textures.push_back(target);
         }

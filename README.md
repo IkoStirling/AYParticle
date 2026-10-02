@@ -63,7 +63,7 @@ test or depth write occurs in the particle overlay lane.
 testing and no depth writes. Alpha particles sort within each emitter; batches
 sort with scene transparent meshes by their center. Intersecting emitters or
 transparent meshes can therefore have approximate ordering. Soft particles,
-global per-particle/mesh sorting, mesh particles, GPU simulation and effect cook
+global per-particle/mesh sorting, mesh particles and effect cook
 remain future work.
 
 Draws use transient GPU buffers, capped at 16383 quads per batch. If the frame's
@@ -90,7 +90,7 @@ presets and reports a 10000-particle CPU benchmark; it is a console benchmark,
 not a graphical preview. Engine integration tests cover scene round-trip and
 2D/3D render submission.
 
-The generated `examples/ParticleShowcase.ayscene` is ready to open in AYEditor.
+The generated `examples/ParticleShowcase.scn` is ready to open in AYEditor.
 It contains an orthographic camera plus Smoke, Sparks and Explosion emitters.
 Smoke emits continuously; Sparks and Explosion replay every 2 seconds so opening
 the scene after its first frame still shows all three effects. For authored burst
@@ -104,7 +104,7 @@ It is excluded from the default build and portable CTest suite.
 
 ## Reusable effects and editing
 
-Use **File > New Particle Effect** in AYEditor. The new .ayparticle is placed in
+Use **File > New Particle Effect** in AYEditor. The new .pfx is placed in
 Assets/effects; double-click it to edit. The page has Play, Pause, Restart, Stop,
 Step (1/60 s), Undo and Redo, plus time/live-count/CPU-update statistics.
 Choose an emitter to edit; add Smoke, Sparks or Explosion, or remove it.
@@ -115,20 +115,20 @@ leave the previous values intact. Playback never marks the asset dirty.
 Save/Save As/Reload/recovery use the normal document commands.
 
 Add **Particle Effect** from the Scene Inspector Effects category, with a
-Transform, and set effectPath to effects/YourEffect.ayparticle. The editor's
+Transform, and set effectPath to effects/YourEffect.pfx. The editor's
 resource browser button can select this file. Existing **Particle Emitter**
 components continue to work. Both have Edit-mode transport controls; resource
 components also have Reload effect to retry failed loads. Only authored values
 and paths save in scenes; playback starts fresh after loading.
 
 The sample under examples/ParticleComposition contains Assets/effects/
-CombinedExplosion.ayparticle and Assets/worlds/ParticleComposition.ayscene.
+CombinedExplosion.pfx and Assets/worlds/ParticleComposition.scn.
 Copy those two files into the matching folders of a project's Assets directory,
 then open the scene. Its composition repeats every 3 seconds.
 
 AYParticle::Runtime retains only standard-library dependencies and now includes
 EffectAsset/EffectInstance. AYParticle::Assets is an optional AYIO/JSON adapter;
-AYParticle::Resources registers .ayparticle with AYResource. Default particle
+AYParticle::Resources registers .pfx with AYResource. Default particle
 integration installs its loader before requests. Resource snapshots are immutable;
 editor saves refresh the cache and changed configurations restart autoPlay.
 Texture paths resolve relative to the effect or mounted asset root.
@@ -177,7 +177,7 @@ effect.colorGradient = {{0, {1, 1, 0.7f, 1}},
 Smoke, Sparks and Explosion presets now demonstrate nonlinear lifetime tracks.
 The generated showcase and CombinedExplosion resource include the same curves;
 both dimensions use the same ParticleInstance::sample calculation.
-CurvedSmoke.ayparticle and CurvedSparks.ayparticle in the composition example's
+CurvedSmoke.pfx and CurvedSparks.pfx in the composition example's
 Assets/effects folder can also be opened independently in the particle editor.
 
 ## Reusable library and packaged playback
@@ -188,7 +188,7 @@ and an executable player. Assets work in both 2D and 3D after changing emitter
 dimension; this showcase uses an orthographic 2D camera.
 
 With `AY_ENABLE_PARTICLE` and resource authoring enabled, `import_tool` accepts
-`.ayparticle`. The adapter validates the typed effect, finds textures inside the
+`.pfx`. The adapter validates the typed effect, finds textures inside the
 nearest `Assets` directory (or `ImportOptions::sourceAssetRoot`), preserves the
 effect's relative filename and rewrites texture references to portable cooked
 paths. Release textures use lossless RGBA8 `.aytex` with mipmaps, retaining soft
@@ -230,20 +230,22 @@ Set `ParticleEffect.backend` or `EffectAsset.backend` to `Backend::Gpu` or
 inherits the asset; 0/1/2 override CPU/GPU/Auto. The effect editor persists **Scene
 backend** in undo/save history; Inspector controls work in the Scene viewport.
 `backendStatus` shows a diagnosed CPU fallback for unsupported builds/devices,
-3D/shapes, textures or capacity budgets. A composition switches as a whole.
+oriented planes, textures or capacity budgets. A composition switches as a whole.
 
-GPU supports 2D World/Local Point/Rectangle/Disk, full emitter basis, lifetime
+GPU supports 2D World/Local Point/Rectangle/Disk and 3D camera-facing
+Point/Rectangle/Disk/Box/Sphere billboards, full emitter basis, lifetime
 curves/gradients and atlas animation. The World reserves full GPU capacity;
 `gpuReservedParticles` is capacity, while `liveParticles` counts CPU particles.
 The isolated native document canvas uses the same GPU composition bridge with
 independent compute/draw views and targets. GPU births, RNG
-and integration differ from CPU; no collision, depth, sorting or compaction.
+and integration differ from CPU; 3D scene batches depth-test and sort by center,
+without per-particle sorting, depth writes, collision or compaction.
 AYShader compiles the four built-in D3D11 shader stages during the build. Their
 binary bundle is embedded in `AYParticleGpu` and travels with every linked host;
 particle playback needs no compiler, source paths or writable shader cache.
 The independent GpuParticles profile packages a compiler-free runtime example.
 The standard ParticleLibrary host still uses the ordinary Renderer/Phoskia runtime
-shader pipeline for other scene shaders. See ParticleLibraryGpu.ayscene for all
+shader pipeline for other scene shaders. See ParticleLibraryGpu.scn for all
 five effects and the GpuParticles README for packaging/validation commands.
 
 ## Typed variation and heterogeneous layers
@@ -265,7 +267,8 @@ age; other curves sample emitter phase at birth. Weighted sources accept up to
 
 Mirror X/Y and reverse playback accept fixed/probability modes. Flipbooks support
 Loop, Once, PingPong and normalized lifetime timing. CPU Plane uses actual 3D
-geometry and tumble; GPU remains 2D with diagnosed whole-composition fallback.
+geometry and tumble; GPU supports camera-facing 3D billboards and falls back
+for oriented planes.
 The editor's layer list, source selector, lower/upper CurveCanvas and activity
 bars support history/save/recovery. Preview seed variation and bounded seek do
 not dirty the resource. Mesh/light/audio/trail layers and arbitrary expressions
@@ -284,7 +287,8 @@ CPU seeking replays the first 60 seconds at 60 Hz; GPU seeking catches up one
 60 Hz step per rendered frame with progress. Restart/Stop/variation cancels it.
 GPU focus uses authored bounds without readback. CPU restoration from long GPU
 playback is bounded to 60 seconds/an initial-cycle phase; after long playback,
-per-cycle random choices can differ. 3D GPU, soft particle fading,
+per-cycle random choices can differ. 3D GPU in this isolated document viewport,
+soft particle fading,
 collisions and scene postprocessing are future work. Non-bgfx hosts retain a
 labeled software CPU fallback.
 

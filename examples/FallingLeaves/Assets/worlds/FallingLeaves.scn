@@ -68,14 +68,14 @@
         {
           "$type": "ParticleEffectComponent",
           "autoPlay": true,
-          "effectPath": "effects/AutumnGust.ayparticle",
+          "effectPath": "effects/FallingLeaves.pfx",
           "layer": 3,
           "sortingKey": 0,
           "backend": 3
         }
       ],
       "id": 2,
-      "name": "Autumn Gust"
+      "name": "Falling Leaves"
     }
   ]
 }
