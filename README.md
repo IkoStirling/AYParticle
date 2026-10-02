@@ -72,11 +72,10 @@ Frame payloads must remain valid until synchronous Renderer::render returns.
 Cached textures/materials are renderer-owned; World shutdown detaches callbacks
 and releases the emitter system's quad.
 
-## Local repository and verification
+## Repository and verification
 
-This is a standalone local Git repository with no remote and no .gitmodules
-entry yet. Root builds require this local checkout when AY_ENABLE_PARTICLE is ON.
-Disable the option on clones that do not contain it.
+This standalone Git repository is registered as an AliyatEngine submodule.
+Initialize submodules before configuring a root build with AY_ENABLE_PARTICLE ON.
 
 ```text
 cmake -S AYRuntime/AYParticle -B out/build/particle-standalone
