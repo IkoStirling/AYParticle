@@ -204,8 +204,9 @@ $output v_uv, v_color
 void main() {
     vec3 position=a_position.xyz;
     if(a_position.w>1.5) {
-        vec3 right=vec3(u_view[0][0],u_view[1][0],u_view[2][0]);
-        vec3 up=vec3(u_view[0][1],u_view[1][1],u_view[2][1]);
+        // Shaderc's D3D11 matrix indexing exposes the camera basis as rows.
+        vec3 right=u_view[0].xyz;
+        vec3 up=u_view[1].xyz;
         position+=right*a_texcoord0.z+up*a_texcoord0.w;
     }
     gl_Position=mul(u_viewProj,vec4(position,1.0)); v_uv=a_texcoord0.xy; v_color=a_color0;

@@ -145,7 +145,9 @@ default soft-disc shader exactly. Verify final appearance in the Scene viewport.
 Effect cook/dependency packaging is implemented by the optional resource
 authoring adapters. The isolated native viewport has a session-only CPU/GPU/Auto
 selector, ground/test cube, background, focus and layer hide/solo. GPU selected
-previews have no live CPU particle arrays. 3D falls back to CPU with a diagnostic.
+previews have no live CPU particle arrays. Supported 3D camera-facing billboards
+use GPU in the perspective/depth preview; oriented planes fall back to CPU with
+a diagnostic.
 
 ## Lifetime curves and gradients
 
@@ -286,12 +288,14 @@ CPU seeking replays the first 60 seconds at 60 Hz; GPU seeking catches up one
 60 Hz step per rendered frame with progress. Restart/Stop/variation cancels it.
 GPU focus uses authored bounds without readback. CPU restoration from long GPU
 playback is bounded to 60 seconds/an initial-cycle phase; after long playback,
-per-cycle random choices can differ. 3D GPU in this isolated document viewport,
-soft particle fading,
-collisions and scene postprocessing are future work. Non-bgfx hosts retain a
+per-cycle random choices can differ. Supported 3D GPU billboards use the orbit
+camera and depth-test against the test cube without depth writes; oriented
+planes fall back to CPU. Soft particle fading, collisions and scene
+postprocessing are future work. Non-bgfx hosts retain a
 labeled software CPU fallback.
 
 Real D3D11 pixel/lifecycle regression: build `AYEditor_ParticlePreviewRenderTest`
 and run with an output directory. It checks perspective object occlusion, real
-GPU compute/draw ordering, empty CPU arrays, hide, seek, stop/restart, resizing
-and multiple preview targets. Model/history checks live in `AYEditor_ParticleTests`.
+GPU compute/draw ordering, 3D orbit-facing/depth occlusion, empty CPU arrays,
+hide, seek, stop/restart, resizing and multiple preview targets. Model/history
+checks live in `AYEditor_ParticleTests`.
