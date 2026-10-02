@@ -23,6 +23,42 @@ enum class Dimension : uint8_t { TwoD, ThreeD };
 enum class Blend : uint8_t { Alpha, Additive };
 /// CPU preserves existing files. GPU/Auto request GPU with a diagnosed CPU fallback.
 enum class Backend : uint8_t { Cpu, Gpu, Auto };
+/// Sweep follows XY motion; Ground treats XY as a landing anchor and simulates
+/// a separate visual height. Both modes require a host-provided scene query.
+enum class CollisionMode2D : uint8_t { None, Sweep, Ground };
+enum class CollisionResponse2D : uint8_t { Kill, Bounce };
+struct Collision2D {
+    CollisionMode2D mode=CollisionMode2D::None;
+    CollisionResponse2D response=CollisionResponse2D::Kill;
+    uint32_t surfaceMask=0xffffffffu;
+    float restitution=0.5f;
+    uint32_t maxBounces=1;
+    /// Ground mode starts at this height above the XY landing anchor.
+    float spawnHeight=2, fallSpeed=4, fallAcceleration=0, visualHeightScale=1;
+    /// A short visual pulse at a hit; zero size disables it.
+    float impactSize=0.12f, impactLifetime=0.25f;
+    Color impactColor{0.7f,0.85f,1,0.8f};
+    bool operator==(const Collision2D&) const = default;
+};
+struct CollisionHit2D {
+    Vec3 position{},normal{};
+    float fraction=1, height=0;
+    uint32_t surfaceTag=0;
+};
+/// Host geometry is in world XY. Ground returns the highest surface at or below
+/// maxHeight; Sweep returns the first contact along from->to.
+class CollisionQuery2D {
+public:
+    virtual ~CollisionQuery2D()=default;
+    virtual bool sweep(Vec3 from,Vec3 to,uint32_t mask,CollisionHit2D& hit) const=0;
+    virtual bool ground(Vec3 anchor,float maxHeight,uint32_t mask,CollisionHit2D& hit) const=0;
+};
+struct Impact2D {
+    Vec3 position{},normal{};
+    float height=0;
+    uint32_t surfaceTag=0;
+    uint64_t birthId=0;
+};
 /// Value-only transport retained by scene components; independent of render devices.
 struct PlaybackControl {
     PlaybackControl() noexcept;
@@ -112,6 +148,7 @@ struct ParticleEffect {
     Space space = Space::World;
     Blend blend = Blend::Alpha;
     Backend backend = Backend::Cpu;
+    Collision2D collision2D{};
     Vec3 extent{1,1,1};
     Vec3 velocityMin{-0.2f,0.5f,0}, velocityMax{0.2f,1,0};
     Vec3 gravity{0,-0.5f,0};
@@ -159,6 +196,9 @@ struct Particle {
     bool flipX=false,flipY=false,reverseAnimation=false;
     float tiltX=0,tiltY=0,tumbleX=0,tumbleY=0;
     Vec3 birthRight{1,0,0},birthUp{0,1,0},birthForward{0,0,1};
+    float height=0,heightVelocity=0,groundHeight=0;
+    uint32_t surfaceTag=0,bounces=0;
+    bool hasGround=false;
 };
 struct ParticleSample {
     Vec3 position{};
@@ -189,8 +229,11 @@ public:
     /// Stop emission; optionally discard living particles immediately.
     void stop(bool clear = false) noexcept;
     /// Global owner supplies its remaining spawn budget. Dropped births never accumulate.
-    void update(float dt, const Pose& pose = {}, uint32_t spawnBudget = ParticleEffect::kMaxCapacity);
+    void update(float dt, const Pose& pose = {}, uint32_t spawnBudget = ParticleEffect::kMaxCapacity,
+                const CollisionQuery2D* collision = nullptr);
     std::span<const Particle> particles() const noexcept { return _particles; }
+    /// Hits from the most recent update; visual-only, bounded to 256 per update.
+    std::span<const Impact2D> impacts() const noexcept { return _impacts; }
     ParticleSample sample(const Particle& particle, const Pose& pose = {}) const;
     bool emitting() const noexcept { return _emitting; }
     bool paused() const noexcept { return _paused; }
@@ -198,10 +241,12 @@ public:
     uint64_t droppedBirths() const noexcept { return _dropped; }
 private:
     float random(float min, float max);
-    Particle spawn(const Pose& pose,double birthTime);
+    Particle spawn(const Pose& pose,double birthTime,const CollisionQuery2D* collision);
     void advance(Particle& p, float dt) const;
+    bool resolveCollision(Particle& p,Vec3 previous,float previousHeight,const CollisionQuery2D* collision);
     ParticleEffect _effect;
     std::vector<Particle> _particles;
+    std::vector<Impact2D> _impacts;
     double _elapsed = 0, _fraction = 0;
     uint32_t _rng = 1;
     uint64_t _nextBirth = 0, _dropped = 0;

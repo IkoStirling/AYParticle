@@ -21,6 +21,50 @@ template<class F> void test(const char* name,F run,int& failed) {
 }
 int main() {
     int failed=0;
+    test("ground collision chooses authored landing height and emits one impact",[] {
+        struct Query final : CollisionQuery2D {
+            bool sweep(Vec3,Vec3,uint32_t,CollisionHit2D&) const override { return false; }
+            bool ground(Vec3 anchor,float maxHeight,uint32_t mask,CollisionHit2D& hit) const override {
+                check(near(anchor.x,2)&&near(anchor.y,3)&&maxHeight==2&&mask==4,"ground query inputs");
+                hit.position=anchor;hit.height=.5f;hit.surfaceTag=7;return true;
+            }
+        } query;
+        auto e=burstEffect();e.collision2D.mode=CollisionMode2D::Ground;
+        e.collision2D.surfaceMask=4;e.collision2D.spawnHeight=2;e.collision2D.fallSpeed=5;
+        Pose pose;pose.position={2,3,0};
+        ParticleInstance p(e);p.play();p.update(0,pose,e.capacity,&query);
+        check(p.particles().size()==1&&near(p.sample(p.particles()[0]).position.y,5),"height is visual only");
+        p.update(.2f,pose,e.capacity,&query);check(p.impacts().empty(),"above roof");
+        p.update(.2f,pose,e.capacity,&query);
+        check(p.particles().empty()&&p.impacts().size()==1,"ground kills exactly once");
+        check(p.impacts()[0].surfaceTag==7&&near(p.impacts()[0].height,.5f),"surface identity retained");
+        p.update(.1f,pose,e.capacity,&query);check(p.impacts().empty(),"hit queue is per update");
+    },failed);
+    test("swept 2D collision bounces then dies at bounce cap",[] {
+        struct Query final : CollisionQuery2D {
+            bool ground(Vec3,float,uint32_t,CollisionHit2D&) const override { return false; }
+            bool sweep(Vec3 from,Vec3 to,uint32_t,CollisionHit2D& hit) const override {
+                if(from.x<.5f&&to.x>=.5f){hit.position={.5f,0,0};hit.normal={-1,0,0};hit.fraction=(.5f-from.x)/(to.x-from.x);return true;}
+                if(from.x>-.5f&&to.x<=-.5f){hit.position={-.5f,0,0};hit.normal={1,0,0};hit.fraction=(from.x+.5f)/(from.x-to.x);return true;}
+                return false;
+            }
+        } query;
+        auto e=burstEffect();e.velocityMin=e.velocityMax={4,0,0};
+        e.collision2D.mode=CollisionMode2D::Sweep;e.collision2D.response=CollisionResponse2D::Bounce;
+        e.collision2D.restitution=.5f;e.collision2D.maxBounces=1;
+        ParticleInstance p(e);p.play();p.update(0,{},e.capacity,&query);
+        p.update(.2f,{},e.capacity,&query);
+        check(p.particles().size()==1&&p.impacts().size()==1,"first sweep contact");
+        check(near(p.particles()[0].velocity.x,-2),"normal restitution reflected");
+        p.update(.6f,{},e.capacity,&query);
+        check(p.particles().empty()&&p.impacts().size()==1,"second contact kills at cap");
+    },failed);
+    test("2D collision rejects unsupported modes and invalid values",[] {
+        auto e=burstEffect();e.collision2D.mode=CollisionMode2D::Ground;
+        e.dimension=Dimension::ThreeD;check(!e.validate(),"3D cannot use 2D collision");
+        e.dimension=Dimension::TwoD;e.collision2D.restitution=2;check(!e.validate(),"restitution bounded");
+        e.collision2D.restitution=.5f;e.space=Space::Local;check(!e.validate(),"world-space collision only");
+    },failed);
     test("fractional rate and birth time",[] {
         auto e=burstEffect(0); e.rate=10; e.duration=2; e.looping=true;
         ParticleInstance p(e); p.play();

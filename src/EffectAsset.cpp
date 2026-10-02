@@ -73,7 +73,7 @@ void EffectInstance::stop(bool clear) noexcept {
 Pose EffectInstance::emitterPose(size_t index,const Pose& parent) const {
     Pose result=parent; result.position=parent.point(_asset.emitters.at(index).offset); return result;
 }
-void EffectInstance::update(float dt,const Pose& pose,uint32_t spawnBudget) {
+void EffectInstance::update(float dt,const Pose& pose,uint32_t spawnBudget,const CollisionQuery2D* collision) {
     const auto finite=[](Vec3 v) { return std::isfinite(v.x) && std::isfinite(v.y) && std::isfinite(v.z); };
     if(_paused || !std::isfinite(dt) || dt<0 || !finite(pose.position) || !finite(pose.right) || !finite(pose.up) || !finite(pose.forward)) return;
     double step=dt;
@@ -97,7 +97,7 @@ void EffectInstance::update(float dt,const Pose& pose,uint32_t spawnBudget) {
             active=static_cast<float>(std::min(step,_phase-_delays[i]));
         }
         uint64_t lastBirth=0; for(const auto& p:instance.particles()) lastBirth=std::max(lastBirth,p.birthId);
-        instance.update(active,emitterPose(i,pose),remaining);
+        instance.update(active,emitterPose(i,pose),remaining,collision);
         uint32_t spawned=0; for(const auto& p:instance.particles()) if(p.birthId>lastBirth) ++spawned;
         remaining-=std::min(remaining,spawned);
     }

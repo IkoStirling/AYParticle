@@ -59,8 +59,29 @@ int main(int argc,char** argv) {
         auto oldV2=nlohmann::json::parse(text);oldV2["schemaVersion"]=2;oldV2.erase("seed");
         for(auto& layer:oldV2["emitters"]) {layer.erase("id");layer.erase("kind");layer.erase("enabled");layer.erase("delayValue");layer["effect"].erase("extensions");}
         check(decodeEffectAsset(oldV2.dump(),output,&error)&&output==asset,"schema 2 compatibility");
+        auto colliding=asset;
+        auto& collision=colliding.emitters[1].effect.collision2D;
+        collision.mode=CollisionMode2D::Sweep;collision.response=CollisionResponse2D::Bounce;
+        collision.surfaceMask=4;collision.restitution=.35f;collision.maxBounces=2;
+        collision.impactColor={.2f,.6f,1,.7f};
+        std::string collisionText;
+        check(encodeEffectAsset(colliding,collisionText,&error),"collision asset encode");
+        check(decodeEffectAsset(collisionText,output,&error)&&output==colliding,"2D collision settings roundtrip");
+        auto invalidCollision=nlohmann::json::parse(collisionText);
+        invalidCollision["emitters"][1]["effect"]["extensions"]["collision2D"]["mode"]=3;
+        check(!decodeEffectAsset(invalidCollision.dump(),output,&error)&&output==colliding,"invalid collision remains transactional");
         std::string extras;auto e=leaves.emitters[0].effect;check(encodeParticleExtensions(e,extras),"component extras encode");
         auto e2=e;e2.values={};e2.flipX={};check(decodeParticleExtensions(extras,e2)&&e2==e,"component extras roundtrip");
+        ParticleInstance decodedInstance(e2);
+        decodedInstance.play();decodedInstance.update(.2f);
+        check(!decodedInstance.particles().empty(),"decoded component values construct a live CPU instance");
+        const auto collisionExample=std::filesystem::path(__FILE__).parent_path().parent_path()
+            /"examples/Collision2D/Assets/effects/RainCollision2D.pfx";
+        EffectAsset collisionAsset;
+        check(loadEffectAsset(collisionExample.string(),collisionAsset,&error)
+            &&collisionAsset.emitters.size()==1
+            &&collisionAsset.emitters[0].effect.collision2D.mode==CollisionMode2D::Ground,
+            "authored 2D collision example loads");
         const auto dir=std::filesystem::temp_directory_path()/"AYParticle_AssetTests";
         std::filesystem::create_directories(dir); const auto path=(dir/"effect.ayparticle").string();
         check(saveEffectAsset(path,asset,&error),"atomic save"); check(loadEffectAsset(path,output,&error) && output==asset,"disk roundtrip");

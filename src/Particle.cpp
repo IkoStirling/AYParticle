@@ -45,6 +45,22 @@ Color sampleGradient(std::span<const GradientKey> keys,float time,Color fallback
 bool ParticleEffect::validate(std::string* error) const {
     const auto fail = [&](const char* text) { if (error) *error = text; return false; };
     if(static_cast<unsigned>(backend)>2) return fail("Invalid particle backend");
+    const auto& c=collision2D;
+    if(static_cast<unsigned>(c.mode)>2 || static_cast<unsigned>(c.response)>1)
+        return fail("Invalid 2D collision mode/response");
+    if(!std::isfinite(c.restitution) || c.restitution<0 || c.restitution>1 || c.maxBounces>8
+        || !std::isfinite(c.spawnHeight) || c.spawnHeight<0 || !std::isfinite(c.fallSpeed) || c.fallSpeed<0
+        || !std::isfinite(c.fallAcceleration) || c.fallAcceleration<0 || !std::isfinite(c.visualHeightScale)
+        || c.visualHeightScale<0 || !std::isfinite(c.impactSize) || c.impactSize<0
+        || !std::isfinite(c.impactLifetime) || c.impactLifetime<=0 || !finite(c.impactColor)
+        || c.impactColor.r<0 || c.impactColor.g<0 || c.impactColor.b<0
+        || c.impactColor.a<0 || c.impactColor.a>1)
+        return fail("Invalid 2D collision parameters");
+    if(c.mode!=CollisionMode2D::None && (dimension!=Dimension::TwoD || space!=Space::World))
+        return fail("2D collision requires 2D world-space particles");
+    if(c.mode==CollisionMode2D::Ground && (velocityMin.x!=0 || velocityMax.x!=0
+        || velocityMin.y!=0 || velocityMax.y!=0 || gravity.x!=0 || gravity.y!=0))
+        return fail("Ground collision requires a stationary XY landing anchor");
     if (!capacity || capacity > kMaxCapacity || burst > kMaxCapacity) return fail("Invalid particle capacity/burst");
     if (!std::isfinite(rate) || rate < 0 || rate > 1000000 || !std::isfinite(duration) || duration <= 0) return fail("Invalid emission rate/duration");
     if (!finite(extent) || extent.x < 0 || extent.y < 0 || extent.z < 0 || !finite(velocityMin) || !finite(velocityMax) || !finite(gravity)) return fail("Invalid shape/velocity/gravity");
@@ -91,6 +107,7 @@ bool ParticleInstance::setEffect(const ParticleEffect& effect, std::string* erro
     if (!effect.validate(error)) return false;
     _effect = effect;
     _particles.clear();
+    _impacts.clear();
     _particles.reserve(effect.capacity);
     _elapsed = _fraction = 0; _rng = effect.seed ? effect.seed : 1;
     _nextBirth = _dropped = 0; _emitting = _paused = _burstPending = false;
@@ -99,6 +116,7 @@ bool ParticleInstance::setEffect(const ParticleEffect& effect, std::string* erro
 void ParticleInstance::play() { play(_effect.seed,0); }
 void ParticleInstance::play(uint32_t instanceSeed,uint64_t effectCycle) {
     _particles.clear(); _elapsed = _fraction = 0;
+    _impacts.clear();
     _rng = instanceSeed ? instanceSeed : 1; _nextBirth = _dropped = 0;
     _instanceSeed=instanceSeed; _effectCycle=effectCycle; _totalTime=0;
     const auto resolve=[&](FloatAttribute key,float legacy){const auto& source=_effect.value(key);
@@ -110,13 +128,14 @@ void ParticleInstance::play(uint32_t instanceSeed,uint64_t effectCycle) {
 }
 void ParticleInstance::stop(bool clear) noexcept {
     _emitting = _burstPending = false; _paused = false; _fraction = 0;
+    _impacts.clear();
     if (clear) _particles.clear();
 }
 float ParticleInstance::random(float min, float max) {
     _rng ^= _rng << 13; _rng ^= _rng >> 17; _rng ^= _rng << 5;
     return lerp(min,max,float(_rng >> 8)*(1.0f/16777216.0f));
 }
-Particle ParticleInstance::spawn(const Pose& pose,double birthTime) {
+Particle ParticleInstance::spawn(const Pose& pose,double birthTime,const CollisionQuery2D* collision) {
     Particle p;
     if (_effect.shape == Shape::Rectangle || _effect.shape == Shape::Box) {
         p.position = {random(-_effect.extent.x,_effect.extent.x),random(-_effect.extent.y,_effect.extent.y),0};
@@ -131,6 +150,15 @@ Particle ParticleInstance::spawn(const Pose& pose,double birthTime) {
     p.velocity = {random(_effect.velocityMin.x,_effect.velocityMax.x),random(_effect.velocityMin.y,_effect.velocityMax.y),random(_effect.velocityMin.z,_effect.velocityMax.z)};
     if (_effect.dimension == Dimension::TwoD) p.velocity.z = 0;
     if (_effect.space == Space::World) { p.position = pose.point(p.position); p.velocity = pose.vector(p.velocity); }
+    if(_effect.collision2D.mode==CollisionMode2D::Ground) {
+        p.height=_effect.collision2D.spawnHeight;
+        p.heightVelocity=-_effect.collision2D.fallSpeed;
+        CollisionHit2D hit;
+        if(collision && collision->ground(p.position,p.height,_effect.collision2D.surfaceMask,hit)
+            && std::isfinite(hit.height) && hit.height<=p.height && hit.height>=0) {
+            p.hasGround=true;p.groundHeight=hit.height;p.surfaceTag=hit.surfaceTag;
+        }
+    }
     p.life = random(_effect.lifetime.min,_effect.lifetime.max);
     p.initialSize = random(_effect.size.min,_effect.size.max);
     p.rotation = random(_effect.rotation.min,_effect.rotation.max);
@@ -170,22 +198,70 @@ void ParticleInstance::advance(Particle& p, float dt) const {
         p.velocity = p.velocity + gravity*dt;
     }
     p.age += dt; p.rotation += p.angularVelocity*dt;
+    if(_effect.collision2D.mode==CollisionMode2D::Ground) {
+        p.height+=p.heightVelocity*dt-0.5f*_effect.collision2D.fallAcceleration*dt*dt;
+        p.heightVelocity-=_effect.collision2D.fallAcceleration*dt;
+    }
     p.tiltX+=p.tumbleX*dt;p.tiltY+=p.tumbleY*dt;
 }
-void ParticleInstance::update(float dt, const Pose& pose, uint32_t spawnBudget) {
+bool ParticleInstance::resolveCollision(Particle& p,Vec3 previous,float previousHeight,const CollisionQuery2D* collision) {
+    const auto& c=_effect.collision2D;
+    if(c.mode==CollisionMode2D::None) return false;
+    CollisionHit2D hit;
+    if(c.mode==CollisionMode2D::Ground) {
+        if(!p.hasGround || previousHeight<p.groundHeight || p.height>p.groundHeight || p.heightVelocity>=0) return false;
+        hit.position=p.position;hit.normal={0,1,0};hit.height=p.groundHeight;hit.surfaceTag=p.surfaceTag;
+        p.height=p.groundHeight;
+    } else {
+        if(!collision || previous==p.position || !collision->sweep(previous,p.position,c.surfaceMask,hit)
+            || !finite(hit.position) || !finite(hit.normal) || !std::isfinite(hit.fraction)
+            || hit.fraction<0 || hit.fraction>1) return false;
+        const float length=std::hypot(hit.normal.x,hit.normal.y);
+        if(length<0.00001f) return false;
+        hit.normal={hit.normal.x/length,hit.normal.y/length,0};
+        if(p.velocity.x*hit.normal.x+p.velocity.y*hit.normal.y>=0) return false;
+        p.position=hit.position;
+    }
+    if(_impacts.size()<256) _impacts.push_back({hit.position,hit.normal,hit.height,hit.surfaceTag,p.birthId});
+    if(c.response==CollisionResponse2D::Kill || p.bounces>=c.maxBounces) return true;
+    ++p.bounces;
+    if(c.mode==CollisionMode2D::Ground) {
+        p.heightVelocity=-p.heightVelocity*c.restitution;
+        if(p.heightVelocity<0.01f) return true;
+        p.height+=0.0001f;
+    } else {
+        const float along=p.velocity.x*hit.normal.x+p.velocity.y*hit.normal.y;
+        p.velocity=p.velocity-hit.normal*((1+c.restitution)*along);
+        p.position=p.position+hit.normal*0.0001f;
+    }
+    return false;
+}
+void ParticleInstance::update(float dt, const Pose& pose, uint32_t spawnBudget,const CollisionQuery2D* collision) {
+    _impacts.clear();
     if (_paused || !std::isfinite(dt) || dt < 0 || !finite(pose.position) || !finite(pose.right) || !finite(pose.up) || !finite(pose.forward)) return;
     for (size_t i = 0; i < _particles.size();) {
         if (double(_particles[i].age)+dt >= _particles[i].life) {
             _particles[i] = _particles.back(); _particles.pop_back();
-        } else { advance(_particles[i],dt); ++i; }
+        } else {
+            const auto previous=_particles[i].position;const float previousHeight=_particles[i].height;
+            advance(_particles[i],dt);
+            if(resolveCollision(_particles[i],previous,previousHeight,collision)) {
+                _particles[i]=_particles.back();_particles.pop_back();
+            } else ++i;
+        }
     }
     if (!_emitting) return;
     const double activeDt = _effect.looping ? dt : std::min<double>(dt,std::max(0.0,double(_effect.duration)-_elapsed));
     uint32_t available = std::min<uint32_t>(spawnBudget, _effect.capacity-static_cast<uint32_t>(_particles.size()));
     const auto birth = [&](float age) {
         if (!available) { ++_dropped; return; }
-        Particle p = spawn(pose,std::max(0.,_totalTime+dt-age));
-        if (age < p.life) { advance(p,age); _particles.push_back(p); --available; }
+        Particle p = spawn(pose,std::max(0.,_totalTime+dt-age),collision);
+        if (age < p.life) {
+            const auto previous=p.position;const float previousHeight=p.height;
+            advance(p,age);
+            if(!resolveCollision(p,previous,previousHeight,collision)) _particles.push_back(p);
+            --available;
+        }
     };
     const double endTime = _elapsed + dt;
     const double cycles = _effect.looping ? std::floor(endTime/_effect.duration) : 0;
@@ -222,6 +298,8 @@ ParticleSample ParticleInstance::sample(const Particle& p, const Pose& pose) con
     const float t = std::clamp(p.age/p.life,0.0f,1.0f);
     auto position=p.position;position.x+=p.swayAmplitude*(std::sin(6.283185307f*p.swayFrequency*p.age+p.swayPhase)-std::sin(p.swayPhase));
     s.position = _effect.space == Space::Local ? pose.point(position) : position;
+    if(_effect.collision2D.mode==CollisionMode2D::Ground)
+        s.position.y+=p.height*_effect.collision2D.visualHeightScale;
     const float scale=_effect.value(FloatAttribute::SizeMultiplier).sample(t,p.sizeRandom,sampleCurve(_effect.sizeCurve,t,lerp(1,_effect.endSizeScale,t)));
     s.size = p.initialSize*scale; s.rotation = p.rotation;
     s.color = {lerp(_effect.startColor.r,_effect.endColor.r,t),lerp(_effect.startColor.g,_effect.endColor.g,t),lerp(_effect.startColor.b,_effect.endColor.b,t),lerp(_effect.startColor.a,_effect.endColor.a,t)};

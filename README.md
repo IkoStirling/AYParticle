@@ -249,6 +249,30 @@ The standard ParticleLibrary host still uses the ordinary Renderer/Phoskia runti
 shader pipeline for other scene shaders. See ParticleLibraryGpu.scn for all
 five effects and the GpuParticles README for packaging/validation commands.
 
+## 2D scene collision
+
+World-space 2D CPU particles can collide with scene-authored
+`ParticleSurface2DComponent` rectangles. `CollisionMode2D::Sweep` tests each XY
+motion segment against `solid` rectangles, for side-view sparks and debris.
+`CollisionMode2D::Ground` keeps the XY position as a landing anchor and falls
+through a separate visual height onto the highest `ground` rectangle below its
+spawn height. This supports top-down or pseudo-perspective rain on ground and
+raised roofs. Ground mode requires zero XY velocity and gravity. Both modes can
+kill or bounce, filter with `surfaceMask`, and emit a bounded contact event.
+The scene integration draws a short, configurable contact pulse when enabled.
+
+Add a surface component to an entity with Transform; its center and half extent
+define an axis-aligned world-XY rectangle. Height, tag, mask, ground and solid
+are serialized scene fields. Surface rectangles are effect collision data and
+need separate Sprite/Tilemap art. The host gathers them each presentation frame;
+they do not alter physics bodies or Tilemap collision. Standalone/headless callers
+can supply `CollisionQuery2D` to `ParticleInstance::update` or
+`EffectInstance::update`. With no query, Sweep has no hits and Ground has no
+landing surface. A requested GPU/Auto backend diagnoses a CPU fallback for
+effects using collision. See [Collision2D](examples/Collision2D/README.md) for a
+loadable rain/roof scene. Surfaces currently ignore Transform rotation and scale;
+Tilemap painting and editor-document collision preview are not implemented.
+
 ## Typed variation and heterogeneous layers
 
 Schema 3 adds Particles/SpriteAnimation layer kinds, stable IDs, composition seed,
@@ -290,7 +314,8 @@ GPU focus uses authored bounds without readback. CPU restoration from long GPU
 playback is bounded to 60 seconds/an initial-cycle phase; after long playback,
 per-cycle random choices can differ. Supported 3D GPU billboards use the orbit
 camera and depth-test against the test cube without depth writes; oriented
-planes fall back to CPU. Soft particle fading, collisions and scene
+planes fall back to CPU. This isolated editor-document viewport does not load
+scene-authored collision surfaces. Soft particle fading and scene
 postprocessing are future work. Non-bgfx hosts retain a
 labeled software CPU fallback.
 

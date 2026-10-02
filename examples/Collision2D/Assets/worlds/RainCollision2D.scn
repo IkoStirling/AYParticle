@@ -1,0 +1,43 @@
+{
+  "__coordConvention": "ay-coordinates-lh-yup-zfwd-ccw-uvtop-m-v1",
+  "__schemaVersion": 3,
+  "entities": [
+    {
+      "id": 1,
+      "name": "2D Camera",
+      "components": [
+        {"$type": "Transform", "position": [0, 0, 0], "rotation": [0, 0, 0, 1], "scale": [1, 1, 1]},
+        {"$type": "OrthoCameraComponent", "active": true, "aspectPolicy": 0, "designHeight": 0, "designWidth": 0,
+         "farZ": 1, "nearZ": -1, "layerMask": 4294967295, "positionX": 0, "positionY": 0,
+         "priority": 0, "rotationRadians": 0, "viewSize": 6, "viewportAspect": 1.777778, "zoom": 1}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Ground",
+      "components": [
+        {"$type": "Transform", "position": [0, 0, 0], "rotation": [0, 0, 0, 1], "scale": [1, 1, 1]},
+        {"$type": "ParticleSurface2DComponent", "halfExtent": [3, 1.2], "height": 0,
+         "surfaceTag": 1, "collisionMask": -1, "ground": true, "solid": false}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Raised Roof",
+      "components": [
+        {"$type": "Transform", "position": [-1, 0, 0], "rotation": [0, 0, 0, 1], "scale": [1, 1, 1]},
+        {"$type": "ParticleSurface2DComponent", "halfExtent": [0.8, 0.55], "height": 0.8,
+         "surfaceTag": 2, "collisionMask": -1, "ground": true, "solid": false}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Rain",
+      "components": [
+        {"$type": "Transform", "position": [0, 0, 0], "rotation": [0, 0, 0, 1], "scale": [1, 1, 1]},
+        {"$type": "ParticleEffectComponent", "autoPlay": true, "effectPath": "effects/RainCollision2D.pfx",
+         "layer": 3, "sortingKey": 0, "backend": 3}
+      ]
+    }
+  ]
+}

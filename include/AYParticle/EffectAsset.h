@@ -47,7 +47,8 @@ public:
     void pause() noexcept { _paused = true; }
     void resume() noexcept { _paused = false; }
     void stop(bool clear = false) noexcept;
-    void update(float dt, const Pose& pose = {}, uint32_t spawnBudget = EffectAsset::kMaxTotalCapacity);
+    void update(float dt, const Pose& pose = {}, uint32_t spawnBudget = EffectAsset::kMaxTotalCapacity,
+                const CollisionQuery2D* collision = nullptr);
     size_t liveParticles() const noexcept;
     bool paused() const noexcept { return _paused; }
     bool finished() const noexcept;

@@ -64,12 +64,35 @@ BoolProperty readBoolSource(const Json& j) {
 Json extensions(const ParticleEffect& e) {
     Json properties=Json::object();
     for(size_t n=0;n<e.values.size();++n)if(!(e.values[n]==NumberProperty{}))properties[attributeName(static_cast<FloatAttribute>(n))]=numberSource(e.values[n]);
-    return {{"properties",properties},{"flipX",boolSource(e.flipX)},{"flipY",boolSource(e.flipY)},{"reverseAnimation",boolSource(e.reverseAnimation)},
+    const auto& c=e.collision2D;
+    Json collision={{"mode",int(c.mode)},{"response",int(c.response)},{"surfaceMask",c.surfaceMask},
+        {"restitution",c.restitution},{"maxBounces",c.maxBounces},{"spawnHeight",c.spawnHeight},
+        {"fallSpeed",c.fallSpeed},{"fallAcceleration",c.fallAcceleration},{"visualHeightScale",c.visualHeightScale},
+        {"impactSize",c.impactSize},{"impactLifetime",c.impactLifetime},{"impactColor",col(c.impactColor)}};
+    return {{"properties",properties},{"collision2D",collision},{"flipX",boolSource(e.flipX)},{"flipY",boolSource(e.flipY)},{"reverseAnimation",boolSource(e.reverseAnimation)},
         {"animationPlayback",int(e.animationPlayback)},{"animationOverLifetime",e.animationOverLifetime},{"facing",int(e.facing)},
         {"tiltX",ran(e.tiltX)},{"tiltY",ran(e.tiltY)},{"tumbleX",ran(e.tumbleX)},{"tumbleY",ran(e.tumbleY)}};
 }
 void readExtensions(const Json& j,ParticleEffect& e) {
     if(!j.is_object())throw std::invalid_argument("Particle extensions must be an object");
+    if(j.contains("collision2D")) {
+        const auto& source=j.at("collision2D");
+        if(!source.is_object())throw std::invalid_argument("2D collision must be an object");
+        auto& c=e.collision2D;
+        const auto mode=integer(source,"mode",0),response=integer(source,"response",0);
+        if(mode>2 || response>1)throw std::invalid_argument("Invalid 2D collision mode/response");
+        c.mode=static_cast<CollisionMode2D>(mode);c.response=static_cast<CollisionResponse2D>(response);
+        c.surfaceMask=integer(source,"surfaceMask",c.surfaceMask);
+        c.maxBounces=integer(source,"maxBounces",c.maxBounces);
+        if(source.contains("restitution"))source.at("restitution").get_to(c.restitution);
+        if(source.contains("spawnHeight"))source.at("spawnHeight").get_to(c.spawnHeight);
+        if(source.contains("fallSpeed"))source.at("fallSpeed").get_to(c.fallSpeed);
+        if(source.contains("fallAcceleration"))source.at("fallAcceleration").get_to(c.fallAcceleration);
+        if(source.contains("visualHeightScale"))source.at("visualHeightScale").get_to(c.visualHeightScale);
+        if(source.contains("impactSize"))source.at("impactSize").get_to(c.impactSize);
+        if(source.contains("impactLifetime"))source.at("impactLifetime").get_to(c.impactLifetime);
+        read(source,"impactColor",c.impactColor);
+    }
     if(j.contains("properties")) {
         if(!j["properties"].is_object())throw std::invalid_argument("Properties must be a named object");
         for(const auto& [name,source]:j["properties"].items()) {

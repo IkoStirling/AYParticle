@@ -84,6 +84,7 @@ struct GpuEmitter::Impl {
 bool GpuEmitter::validate(const ParticleEffect& e,std::string* error) {
     if(!e.validate(error)) return false;
     const auto fail=[&](const char* text){ if(error) *error=text; return false; };
+    if(e.collision2D.mode!=CollisionMode2D::None) return fail("2D scene collisions require CPU simulation");
     if(e.duration<.001f) return fail("GPU emission duration must be at least 1ms");
     if(e.facing!=ParticleFacing::Billboard)
         return fail("GPU supports camera-facing billboards only");
